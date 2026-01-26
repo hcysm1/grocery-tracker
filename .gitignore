@@ -1,0 +1,17 @@
+# Next.js
+node_modules/
+.next/
+out/
+
+# Database / Docker
+docker/volumes/
+.supabase/
+
+# Secrets
+.env
+.env.local
+.env.development.local
+
+#OS files
+.DS_Store
+Thumbs.db

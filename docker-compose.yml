@@ -1,0 +1,19 @@
+services:
+  # The Database: Postgres with Vector support for AI matching
+  db:
+    image: supabase/postgres:15.1.1.78
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_PASSWORD: admin123
+    volumes:
+      # This saves your grocery data into a folder on your D: drive
+      - ./docker/volumes/db:/var/lib/postgresql/data
+
+  # The Studio: The dashboard you'll see in your browser
+  studio:
+    image: supabase/studio:latest
+    ports:
+      - "54323:3000"
+    environment:
+      SUPABASE_URL: http://db:54321
