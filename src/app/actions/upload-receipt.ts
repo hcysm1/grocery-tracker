@@ -15,21 +15,19 @@ export async function uploadReceiptAction(formData: FormData) {
   try {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    // Enable JSON Mode for faster AI response
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      generationConfig: { responseMimeType: "application/json" } 
+    });
 
-    // Added instruction to extract the date for monthly categorization
     const prompt = `
       Analyze this grocery receipt. 
-      1. Extract store name, total, and the DATE on the receipt (YYYY-MM-DD).
-      2. Extract all items and prices. Translate to English.
-      3. Standardize names (e.g., "Whole Milk" instead of "Milk 1L").
-      4. Return ONLY valid JSON:
-         {
-           "store": "Store Name",
-           "date": "2024-05-15", 
-           "total": 0.00,
-           "items": [{"name": "Item Name", "price": 0.00, "quantity": 1}]
-         }
+      Extract store name, total, and the DATE on the receipt (YYYY-MM-DD).
+      Extract all items and prices. Standardize names (e.g., "Whole Milk").
+      Return JSON:
+      {"store": "string", "date": "string", "total": number, "items": [{"name": "string", "price": number, "quantity": number}]}
     `;
 
     const imagePart = {
@@ -37,50 +35,46 @@ export async function uploadReceiptAction(formData: FormData) {
     };
 
     const result = await model.generateContent([prompt, imagePart]);
-    const responseText = result.response.text().replace(/```json|```/g, "").trim();
-    const extractedData = JSON.parse(responseText);
+    const extractedData = JSON.parse(result.response.text());
 
-    // 1. Insert Receipt (Using the date FROM the receipt for monthly tracking)
+    // 1. Insert Receipt (One trip)
     const { data: receipt, error: receiptError } = await supabase
       .from("receipts")
       .insert({
         store_name: extractedData.store,
         total_amount: extractedData.total,
-        created_at: extractedData.date, // Use the extracted date here!
+        created_at: extractedData.date || new Date().toISOString(),
       })
-      .select()
-      .single();
+      .select().single();
 
     if (receiptError) throw receiptError;
 
-    // 2. Process Items
-    for (const item of extractedData.items) {
-      // Check if product exists (Case-insensitive)
-      let { data: product } = await supabase
-        .from("products")
-        .select("id")
-        .ilike("name", item.name)
-        .single();
+    // 2. BULK UPSERT PRODUCTS (One trip for ALL items)
+    const productNames = extractedData.items.map((item: any) => ({
+      name: item.name.trim()
+    }));
 
-      // Create product if missing
-      if (!product) {
-        const { data: newProduct } = await supabase
-          .from("products")
-          .insert({ name: item.name }) // No user_id needed if nullable
-          .select()
-          .single();
-        product = newProduct;
-      }
+    const { data: products, error: productError } = await supabase
+      .from("products")
+      .upsert(productNames, { onConflict: 'name' }) 
+      .select();
 
-      if (product) {
-        await supabase.from("receipt_items").insert({
-          receipt_id: receipt.id,
-          product_id: product.id,
-          price: item.price,
-          quantity: item.quantity,
-        });
-      }
-    }
+    if (productError) throw productError;
+
+    // 3. BULK INSERT ITEMS (One trip for ALL items)
+    const receiptItemsEntries = extractedData.items.map((item: any) => {
+      const matchedProduct = products.find(
+        (p) => p.name.toLowerCase() === item.name.toLowerCase().trim()
+      );
+      return {
+        receipt_id: receipt.id,
+        product_id: matchedProduct?.id,
+        price: item.price,
+        quantity: item.quantity || 1,
+      };
+    });
+
+    await supabase.from("receipt_items").insert(receiptItemsEntries);
 
     revalidatePath("/");
     return { success: true };
