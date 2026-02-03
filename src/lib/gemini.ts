@@ -21,7 +21,7 @@ export async function extractReceiptData(
   mimeType: string
 ): Promise<ExtractedReceipt> {
   // Use gemini-1.5-flash: It's optimized for speed and high-volume OCR tasks
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
 
   const prompt = `
     Analyze this grocery receipt image:
