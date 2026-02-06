@@ -20,7 +20,7 @@ export async function extractReceiptData(
   imageBuffer: Buffer, 
   mimeType: string
 ): Promise<ExtractedReceipt> {
-  // Use gemini-1.5-flash: It's optimized for speed and high-volume OCR tasks
+  // Use gemini-2.5-flash: It's optimized for speed and high-volume OCR tasks
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
   const prompt = `
