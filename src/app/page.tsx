@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { uploadReceiptAction } from "./actions/upload-receipt";
-import { Camera, Loader2, CheckCircle, UploadCloud, BrainCircuit } from "lucide-react";
+import { Camera, Loader2, CheckCircle} from "lucide-react";
 import imageCompression from 'browser-image-compression';
 
 export default function GroceryTracker() {
