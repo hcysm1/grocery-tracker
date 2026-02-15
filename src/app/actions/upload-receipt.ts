@@ -117,7 +117,33 @@ export async function uploadReceiptAction(formData: FormData) {
 
     console.log(" [SUCCESS]: All data saved.");
     revalidatePath("/");
-    return { success: true };
+    
+    // Fetch the complete receipt with all relations
+    const { data: completeReceipt, error: fetchError } = await supabase
+      .from("receipts")
+      .select(`
+        id,
+        store_name,
+        total_amount,
+        created_at,
+        receipt_items (
+          id,
+          price,
+          quantity,
+          products (
+            name
+          )
+        )
+      `)
+      .eq("id", receipt.id)
+      .single();
+
+    if (fetchError) {
+      console.error(" [WARNING]: Could not fetch complete receipt:", fetchError.message);
+      return { success: true, receipt: null };
+    }
+
+    return { success: true, receipt: completeReceipt };
 
   } catch (error: any) {
     // This is the most important log
