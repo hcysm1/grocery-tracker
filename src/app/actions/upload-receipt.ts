@@ -77,9 +77,8 @@ export async function uploadReceiptAction(formData: FormData) {
 
     // 2. BULK UPSERT PRODUCTS
     console.log(" [STEP 6]: Upserting Products...");
-    const productNames = extractedData.items.map((item: any) => ({
-      name: item.name.trim()
-    }));
+    const uniqueProductNames = [...new Set(extractedData.items.map((item: any) => item.name.trim()))];
+    const productNames = uniqueProductNames.map(name => ({ name }));
 
     const { data: products, error: productError } = await supabase
       .from("products")
