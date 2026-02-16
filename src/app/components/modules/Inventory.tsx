@@ -14,10 +14,11 @@ interface InventoryItem {
 interface InventoryProps {
   receipts: any[];
   userCurrency: string;
+  inventoryItems: InventoryItem[];
+  onUpdateInventory: (items: InventoryItem[]) => void;
 }
 
-export default function Inventory({ receipts, userCurrency }: InventoryProps) {
-  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
+export default function Inventory({ receipts, userCurrency, inventoryItems, onUpdateInventory }: InventoryProps) {
   const [newItemName, setNewItemName] = useState("");
   const [newItemQty, setNewItemQty] = useState("1");
 
@@ -53,14 +54,14 @@ export default function Inventory({ receipts, userCurrency }: InventoryProps) {
 
     const existing = inventoryItems.find((i) => i.name.toLowerCase() === name.toLowerCase());
     if (existing) {
-      setInventoryItems(
+      onUpdateInventory(
         inventoryItems.map((i) =>
           i.name.toLowerCase() === name.toLowerCase() ? { ...i, quantity: i.quantity + qty } : i
         )
       );
     } else {
       const suggested = suggestedItems.find((s) => s.name.toLowerCase() === name.toLowerCase());
-      setInventoryItems([
+      onUpdateInventory([
         ...inventoryItems,
         {
           name,
@@ -77,7 +78,7 @@ export default function Inventory({ receipts, userCurrency }: InventoryProps) {
   };
 
   const handleUpdateQty = (name: string, delta: number) => {
-    setInventoryItems(
+    onUpdateInventory(
       inventoryItems
         .map((i) => (i.name === name ? { ...i, quantity: Math.max(0, i.quantity + delta) } : i))
         .filter((i) => i.quantity > 0)
@@ -85,7 +86,7 @@ export default function Inventory({ receipts, userCurrency }: InventoryProps) {
   };
 
   const handleRemoveItem = (name: string) => {
-    setInventoryItems(inventoryItems.filter((i) => i.name !== name));
+    onUpdateInventory(inventoryItems.filter((i) => i.name !== name));
   };
 
   const totalValue = inventoryItems.reduce((sum, item) => sum + item.quantity * item.lastPrice, 0);

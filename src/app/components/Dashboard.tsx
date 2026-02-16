@@ -11,10 +11,19 @@ import { getReceiptsAction } from "@/app/actions/get-receipts";
 
 type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices" | "inventory";
 
+interface InventoryItem {
+  name: string;
+  quantity: number;
+  lastPrice: number;
+  lastBought: string;
+  frequency: number;
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [receipts, setReceipts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [userProfile, setUserProfile] = useState({
     name: "User",
     email: "user@example.com",
@@ -34,6 +43,37 @@ export default function Dashboard() {
     };
     fetchReceipts();
   }, []);
+
+  useEffect(() => {
+    const itemMap = new Map<string, InventoryItem>();
+
+    receipts.forEach((receipt) => {
+      receipt.receipt_items?.forEach((item: any) => {
+        const name = item.products?.name || "Unknown";
+        const quantity = item.quantity || 1;
+        const price = item.price || 0;
+        if (itemMap.has(name)) {
+          const existing = itemMap.get(name)!;
+          existing.quantity += quantity;
+          existing.frequency += 1;
+          if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
+            existing.lastBought = receipt.created_at;
+            existing.lastPrice = price;
+          }
+        } else {
+          itemMap.set(name, {
+            name,
+            quantity,
+            lastPrice: price,
+            lastBought: receipt.created_at,
+            frequency: 1,
+          });
+        }
+      });
+    });
+
+    setInventoryItems(Array.from(itemMap.values()));
+  }, [receipts]);
 
   const handleReceiptAdded = async (newReceipt: any) => {
     // Refresh receipts from server to get fresh data with all relations
@@ -161,7 +201,12 @@ export default function Dashboard() {
                   <PriceTracker receipts={receipts} userCurrency={userProfile.currency} />
                 )}
                 {activeTab === "inventory" && (
-                  <Inventory receipts={receipts} userCurrency={userProfile.currency} />
+                  <Inventory 
+                    receipts={receipts} 
+                    userCurrency={userProfile.currency}
+                    inventoryItems={inventoryItems}
+                    onUpdateInventory={setInventoryItems}
+                  />
                 )}
               </>
             ) : (
