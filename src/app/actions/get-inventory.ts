@@ -15,5 +15,11 @@ export async function getInventoryAction() {
     return [];
   }
 
-  return data || [];
+  // Ensure numeric fields are numbers, not null
+  return (data || []).map(item => ({
+    ...item,
+    quantity: item.quantity || 0,
+    lastPrice: item.last_price || 0,
+    frequency: item.frequency || 0,
+  }));
 }

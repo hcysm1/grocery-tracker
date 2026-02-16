@@ -119,7 +119,7 @@ export default function Inventory({ receipts, userCurrency, inventoryItems, onUp
     setEditingName("");
   };
 
-  const totalValue = inventoryItems.reduce((sum, item) => sum + item.quantity * item.lastPrice, 0);
+  const totalValue = inventoryItems.reduce((sum, item) => sum + (item.quantity || 0) * (item.lastPrice || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -248,10 +248,10 @@ export default function Inventory({ receipts, userCurrency, inventoryItems, onUp
                     </div>
                   </td>
                   <td className="px-6 py-4 text-right text-slate-700">
-                    {userCurrency} {item.lastPrice.toFixed(2)}
+                    {userCurrency} {(item.lastPrice || 0).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 text-right font-semibold text-slate-900">
-                    {userCurrency} {(item.quantity * item.lastPrice).toFixed(2)}
+                    {userCurrency} {((item.quantity || 0) * (item.lastPrice || 0)).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button
@@ -286,7 +286,7 @@ export default function Inventory({ receipts, userCurrency, inventoryItems, onUp
               >
                 <p className="font-medium text-slate-900 capitalize">{item.name}</p>
                 <p className="text-xs text-slate-500 mt-1">
-                  Bought {item.frequency} times • {userCurrency} {item.lastPrice.toFixed(2)}
+                  Bought {item.frequency || 0} times • {userCurrency} {(item.lastPrice || 0).toFixed(2)}
                 </p>
               </button>
             ))}

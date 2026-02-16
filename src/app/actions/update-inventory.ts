@@ -12,10 +12,10 @@ export async function updateInventoryAction(inventoryItems: any[]) {
     .upsert(
       inventoryItems.map(item => ({
         name: item.name,
-        quantity: item.quantity,
-        last_price: item.lastPrice,
+        quantity: item.quantity || 0,
+        last_price: item.lastPrice || 0,
         last_bought: item.lastBought,
-        frequency: item.frequency,
+        frequency: item.frequency || 0,
         updated_at: new Date().toISOString(),
       })),
       { onConflict: 'name' }
