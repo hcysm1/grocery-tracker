@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Package, Plus, Minus, AlertCircle, Trash2, Edit, Check, X } from "lucide-react";
 
 interface InventoryItem {
+  id?: string;
   name: string;
   quantity: number;
   lastPrice: number;

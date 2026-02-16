@@ -14,6 +14,7 @@ import { updateInventoryAction } from "@/app/actions/update-inventory";
 type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices" | "inventory";
 
 interface InventoryItem {
+  id?: string;
   name: string;
   quantity: number;
   lastPrice: number;
