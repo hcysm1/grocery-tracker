@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Navigation } from "./Navigation";
+import { useState, useEffect, useCallback } from "react";
 import ReceiptScanner from "./modules/ReceiptScanner";
 import MonthlyDashboard from "./modules/MonthlyDashboard";
 import PriceTracker from "./modules/PriceTracker";
 import Inventory from "./modules/Inventory";
-import { Sheet, Home, TrendingUp, Package, Settings } from "lucide-react";
+import { Sheet, Home, TrendingUp, Package, Settings, Loader2 } from "lucide-react";
 import { getReceiptsAction } from "@/app/actions/get-receipts";
 import { getInventoryAction } from "@/app/actions/get-inventory";
 import { updateInventoryAction } from "@/app/actions/update-inventory";
 
 type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices" | "inventory";
 
+// Matches the interface used in Inventory.tsx
 interface InventoryItem {
   id?: string;
   name: string;
@@ -27,149 +27,140 @@ export default function Dashboard() {
   const [receipts, setReceipts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
-  const [userProfile, setUserProfile] = useState({
+  const [userProfile] = useState({
     name: "User",
     email: "user@example.com",
     currency: "MYR"
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [receiptsData, inventoryData] = await Promise.all([
-          getReceiptsAction(),
-          getInventoryAction()
-        ]);
-        setReceipts(receiptsData || []);
+  /**
+   * REFRESH DATA
+   * Fetches everything from Supabase and populates inventory if empty.
+   */
+  const refreshData = useCallback(async () => {
+    try {
+      const [receiptsData, inventoryData] = await Promise.all([
+        getReceiptsAction(),
+        getInventoryAction()
+      ]);
+      
+      setReceipts(receiptsData || []);
+      
+      let finalInventory: InventoryItem[] = inventoryData || [];
+      
+      // If DB is empty, build initial inventory from receipt history
+      if (finalInventory.length === 0 && receiptsData && receiptsData.length > 0) {
+        const itemMap = new Map<string, InventoryItem>();
         
-        let finalInventory = inventoryData || [];
-        
-        // If inventory is empty but we have receipts, populate from receipts
-        if (finalInventory.length === 0 && receiptsData && receiptsData.length > 0) {
-          const itemMap = new Map<string, InventoryItem>();
-          receiptsData.forEach((receipt: any) => {
-            receipt.receipt_items?.forEach((item: any) => {
-              const name = item.products?.name || "Unknown";
-              const quantity = item.quantity || 1;
-              const price = item.price || 0;
-              if (itemMap.has(name)) {
-                const existing = itemMap.get(name)!;
-                existing.quantity += quantity;
-                existing.frequency += 1;
-                if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
-                  existing.lastBought = receipt.created_at;
-                  existing.lastPrice = price;
-                }
-              } else {
-                itemMap.set(name, {
-                  name,
-                  quantity,
-                  lastPrice: price,
-                  lastBought: receipt.created_at,
-                  frequency: 1,
-                });
+        receiptsData.forEach((receipt: any) => {
+          receipt.receipt_items?.forEach((item: any) => {
+            const name = item.products?.name || "Unknown";
+            const price = Number(item.price) || 0;
+            
+            // 1. FILTER: Ignore discounts, service charges, and negative adjustments
+            if (
+              name.toLowerCase().includes('discount') || 
+              name.toLowerCase().includes('service charge') ||
+              price < 0
+            ) return;
+
+            if (itemMap.has(name)) {
+              const existing = itemMap.get(name)!;
+              existing.quantity += (item.quantity || 1);
+              existing.frequency += 1;
+              // Keep the price from the most recent receipt
+              if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
+                existing.lastBought = receipt.created_at;
+                existing.lastPrice = price;
               }
-            });
+            } else {
+              itemMap.set(name, {
+                name,
+                quantity: item.quantity || 1,
+                lastPrice: price,
+                lastBought: receipt.created_at || new Date().toISOString(),
+                frequency: 1,
+              });
+            }
           });
-          finalInventory = Array.from(itemMap.values());
-          // Save to database
-          await updateInventoryAction(finalInventory);
-        }
+        });
         
-        setInventoryItems(finalInventory);
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      } finally {
-        setLoading(false);
+        const itemsToSave = Array.from(itemMap.values());
+        
+        if (itemsToSave.length > 0) {
+          await updateInventoryAction(itemsToSave);
+          // 2. RE-FETCH: Get the IDs created by Supabase
+          const refreshedFromDb = await getInventoryAction();
+          finalInventory = refreshedFromDb.length > 0 ? refreshedFromDb : itemsToSave;
+        }
       }
-    };
-    fetchData();
+      
+      setInventoryItems(finalInventory);
+    } catch (error) {
+      console.error("Dashboard Refresh Error:", error);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const handleReceiptAdded = async (newReceipt: any) => {
-    const oldReceiptIds = new Set(receipts.map(r => r.id));
-    // Refresh receipts from server to get fresh data with all relations
-    try {
-      const data = await getReceiptsAction();
-      setReceipts(data || []);
+  useEffect(() => {
+    refreshData();
+  }, [refreshData]);
 
-      // Find new receipts
-      const newReceipts = data.filter((r: any) => !oldReceiptIds.has(r.id));
-
-      // Add items from new receipts to inventory
-      const updatedInventory = [...inventoryItems];
-      newReceipts.forEach((receipt: any) => {
-        receipt.receipt_items?.forEach((item: any) => {
-          const name = item.products?.name || "Unknown";
-          const quantity = item.quantity || 1;
-          const price = item.price || 0;
-          const existing = updatedInventory.find(i => i.name.toLowerCase() === name.toLowerCase());
-          if (existing) {
-            existing.quantity += quantity;
-            existing.frequency += 1;
-            if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
-              existing.lastBought = receipt.created_at;
-              existing.lastPrice = price;
-            }
-          } else {
-            updatedInventory.push({
-              name,
-              quantity,
-              lastPrice: price,
-              lastBought: receipt.created_at,
-              frequency: 1,
-            });
-          }
-        });
-      });
-
-      setInventoryItems(updatedInventory);
-      // Save to database
-      await updateInventoryAction(updatedInventory);
-    } catch (error) {
-      console.error("Failed to refresh receipts after upload:", error);
-      // Fallback: at least add to local state
-      setReceipts([...receipts, newReceipt]);
-    }
+  /**
+   * HANDLERS
+   */
+  const handleReceiptAdded = async () => {
+    setLoading(true);
+    await refreshData(); // Pull fresh data from server including updated inventory
+    setActiveTab("inventory");
   };
 
   const handleInventoryUpdate = async (updatedItems: InventoryItem[]) => {
+    // Optimistic Update: Update UI immediately
     setInventoryItems(updatedItems);
     try {
       await updateInventoryAction(updatedItems);
     } catch (error) {
-      console.error("Failed to save inventory:", error);
+      console.error("Failed to save inventory update:", error);
+      // In a production app, you'd trigger a toast notification here
     }
   };
 
   const navigationItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "receipts", label: "Scan Receipts", icon: Sheet },
-    { id: "monthly", label: "Monthly View", icon: TrendingUp },
     { id: "prices", label: "Price History", icon: TrendingUp },
     { id: "inventory", label: "Inventory", icon: Package },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* HEADER */}
+    <div className="min-h-screen bg-slate-50">
+      {/* APP HEADER */}
       <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-200">
               <Sheet className="text-white" size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">GroceryTrack</h1>
-              <p className="text-xs text-slate-500">Smart Receipt & Inventory Manager</p>
+              <h1 className="text-xl font-bold text-slate-900 leading-tight">GroceryTrack</h1>
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Smart Inventory</p>
             </div>
           </div>
+          
+          {loading && (
+            <div className="flex items-center gap-2 text-blue-600 text-sm font-medium animate-pulse">
+              <Loader2 className="animate-spin" size={16} /> Syncing...
+            </div>
+          )}
+
           <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-sm font-semibold text-slate-900">{userProfile.name}</p>
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-bold text-slate-900">{userProfile.name}</p>
               <p className="text-xs text-slate-500">{userProfile.email}</p>
             </div>
-            <button className="p-2 hover:bg-slate-100 rounded-lg transition">
+            <button className="p-2 hover:bg-slate-100 rounded-full transition">
               <Settings className="text-slate-600" size={20} />
             </button>
           </div>
@@ -177,80 +168,51 @@ export default function Dashboard() {
       </header>
 
       <div className="flex">
-        {/* SIDEBAR NAVIGATION */}
+        {/* DESKTOP SIDEBAR */}
         <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col sticky top-16 h-[calc(100vh-64px)]">
-          <nav className="flex-1 px-4 py-6 space-y-2">
+          <nav className="flex-1 px-4 py-6 space-y-1">
             {navigationItems.map((item) => {
-              const IconComponent = item.icon;
+              const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as ActiveTab)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                     isActive
-                      ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
-                      : "text-slate-700 hover:bg-slate-50"
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-100"
+                      : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  <IconComponent size={20} />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon size={20} />
+                  <span className="font-semibold">{item.label}</span>
                 </button>
               );
             })}
           </nav>
-          <div className="px-4 py-4 border-t border-slate-200 space-y-2">
-            <p className="text-xs font-semibold text-slate-500 uppercase">Quick Stats</p>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-600">Total Spent:</span>
-                <span className="font-semibold text-slate-900">
-                  {userProfile.currency} {receipts.reduce((sum, r) => sum + (r.total_amount || 0), 0).toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-600">Receipts:</span>
-                <span className="font-semibold text-slate-900">{receipts.length}</span>
-              </div>
+
+          {/* SIDEBAR FOOTER STATS */}
+          <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Total Spend</span>
+              <span className="text-[10px] font-bold text-blue-600">{userProfile.currency}</span>
             </div>
+            <p className="text-2xl font-black text-slate-900">
+              {receipts.reduce((sum, r) => sum + (r.total_amount || 0), 0).toFixed(2)}
+            </p>
           </div>
         </aside>
 
-        {/* MOBILE NAVIGATION - Hidden on desktop */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50">
-          <div className="flex overflow-x-auto">
-            {navigationItems.map((item) => {
-              const IconComponent = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id as ActiveTab)}
-                  className={`flex-1 flex flex-col items-center gap-1 px-3 py-2 text-xs transition ${
-                    isActive ? "text-blue-600" : "text-slate-600"
-                  }`}
-                >
-                  <IconComponent size={20} />
-                  <span className="truncate">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* MAIN CONTENT */}
-        <main className="flex-1 mb-20 md:mb-0">
-          <div className="max-w-6xl mx-auto p-6">
-            {!loading ? (
-              <>
+        {/* MAIN DISPLAY AREA */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-5xl mx-auto p-6 lg:p-10">
+            {!loading || receipts.length > 0 ? (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                 {activeTab === "dashboard" && (
                   <MonthlyDashboard receipts={receipts} userCurrency={userProfile.currency} />
                 )}
                 {activeTab === "receipts" && (
                   <ReceiptScanner onReceiptAdded={handleReceiptAdded} />
-                )}
-                {activeTab === "monthly" && (
-                  <MonthlyDashboard receipts={receipts} userCurrency={userProfile.currency} />
                 )}
                 {activeTab === "prices" && (
                   <PriceTracker receipts={receipts} userCurrency={userProfile.currency} />
@@ -263,17 +225,31 @@ export default function Dashboard() {
                     onUpdateInventory={handleInventoryUpdate}
                   />
                 )}
-              </>
+              </div>
             ) : (
-              <div className="flex items-center justify-center h-96">
-                <div className="text-center">
-                  <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-slate-600">Loading your dashboard...</p>
-                </div>
+              <div className="flex flex-col items-center justify-center h-[60vh]">
+                <Loader2 className="w-10 h-10 text-blue-600 animate-spin mb-4" />
+                <p className="text-slate-500 font-medium italic">Scanning your kitchen history...</p>
               </div>
             )}
           </div>
         </main>
+      </div>
+
+      {/* MOBILE NAV (Hidden on Desktop) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 flex justify-around p-2">
+        {navigationItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button 
+              key={item.id} 
+              onClick={() => setActiveTab(item.id as ActiveTab)}
+              className={`p-3 rounded-lg ${activeTab === item.id ? "text-blue-600 bg-blue-50" : "text-slate-400"}`}
+            >
+              <Icon size={20} />
+            </button>
+          );
+        })}
       </div>
     </div>
   );
