@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Package, Plus, Minus, AlertCircle, Trash2 } from "lucide-react";
+import { Package, Plus, Minus, AlertCircle, Trash2, Edit, Check, X } from "lucide-react";
 
 interface InventoryItem {
   name: string;
@@ -21,6 +21,8 @@ interface InventoryProps {
 export default function Inventory({ receipts, userCurrency, inventoryItems, onUpdateInventory }: InventoryProps) {
   const [newItemName, setNewItemName] = useState("");
   const [newItemQty, setNewItemQty] = useState("1");
+  const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   const suggestedItems = useMemo(() => {
     const itemMap = new Map<string, { name: string; frequency: number; lastPrice: number; lastDate: string }>();
@@ -87,6 +89,34 @@ export default function Inventory({ receipts, userCurrency, inventoryItems, onUp
 
   const handleRemoveItem = (name: string) => {
     onUpdateInventory(inventoryItems.filter((i) => i.name !== name));
+  };
+
+  const handleEditItem = (name: string) => {
+    setEditingItem(name);
+    setEditingName(name);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingName.trim() || !editingItem) return;
+    const trimmedName = editingName.trim();
+    // Check if name already exists (excluding the current item)
+    const nameExists = inventoryItems.some(item => item.name.toLowerCase() === trimmedName.toLowerCase() && item.name !== editingItem);
+    if (nameExists) {
+      alert("An item with this name already exists.");
+      return;
+    }
+    onUpdateInventory(
+      inventoryItems.map(item =>
+        item.name === editingItem ? { ...item, name: trimmedName } : item
+      )
+    );
+    setEditingItem(null);
+    setEditingName("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingItem(null);
+    setEditingName("");
   };
 
   const totalValue = inventoryItems.reduce((sum, item) => sum + item.quantity * item.lastPrice, 0);
@@ -161,7 +191,45 @@ export default function Inventory({ receipts, userCurrency, inventoryItems, onUp
             <tbody className="divide-y divide-slate-200">
               {inventoryItems.map((item) => (
                 <tr key={item.name} className="hover:bg-slate-50 transition">
-                  <td className="px-6 py-4 font-medium text-slate-900 capitalize">{item.name}</td>
+                  <td className="px-6 py-4 font-medium text-slate-900">
+                    {editingItem === item.name ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === "Enter") handleSaveEdit();
+                            if (e.key === "Escape") handleCancelEdit();
+                          }}
+                          className="flex-1 px-2 py-1 border border-slate-300 rounded focus:outline-none focus:border-blue-500"
+                          autoFocus
+                        />
+                        <button
+                          onClick={handleSaveEdit}
+                          className="p-1 hover:bg-green-100 text-green-600 rounded transition"
+                        >
+                          <Check size={16} />
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="p-1 hover:bg-red-100 text-red-600 rounded transition"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="capitalize">{item.name}</span>
+                        <button
+                          onClick={() => handleEditItem(item.name)}
+                          className="p-1 hover:bg-blue-100 text-blue-600 rounded transition"
+                        >
+                          <Edit size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center gap-2">
                       <button
