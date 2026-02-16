@@ -119,7 +119,7 @@ export default function Inventory({ receipts, userCurrency, inventoryItems, onUp
     setEditingName("");
   };
 
-  const totalValue = inventoryItems.reduce((sum, item) => sum + (item.quantity || 0) * (item.lastPrice || 0), 0);
+  const totalValue = receipts.reduce((sum, receipt) => sum + (receipt.total_amount || 0), 0);
 
   return (
     <div className="space-y-6">
@@ -189,8 +189,8 @@ export default function Inventory({ receipts, userCurrency, inventoryItems, onUp
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {inventoryItems.map((item) => (
-                <tr key={item.name} className="hover:bg-slate-50 transition">
+              {inventoryItems.map((item, index) => (
+                <tr key={index} className="hover:bg-slate-50 transition">
                   <td className="px-6 py-4 font-medium text-slate-900">
                     {editingItem === item.name ? (
                       <div className="flex items-center gap-2">
