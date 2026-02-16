@@ -8,6 +8,8 @@ import PriceTracker from "./modules/PriceTracker";
 import Inventory from "./modules/Inventory";
 import { Sheet, Home, TrendingUp, Package, Settings } from "lucide-react";
 import { getReceiptsAction } from "@/app/actions/get-receipts";
+import { getInventoryAction } from "@/app/actions/get-inventory";
+import { updateInventoryAction } from "@/app/actions/update-inventory";
 
 type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices" | "inventory";
 
@@ -31,59 +33,76 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const fetchReceipts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getReceiptsAction();
-        setReceipts(data || []);
+        const [receiptsData, inventoryData] = await Promise.all([
+          getReceiptsAction(),
+          getInventoryAction()
+        ]);
+        setReceipts(receiptsData || []);
+        setInventoryItems(inventoryData || []);
       } catch (error) {
-        console.error("Failed to fetch receipts:", error);
+        console.error("Failed to fetch data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchReceipts();
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    const itemMap = new Map<string, InventoryItem>();
-
-    receipts.forEach((receipt) => {
-      receipt.receipt_items?.forEach((item: any) => {
-        const name = item.products?.name || "Unknown";
-        const quantity = item.quantity || 1;
-        const price = item.price || 0;
-        if (itemMap.has(name)) {
-          const existing = itemMap.get(name)!;
-          existing.quantity += quantity;
-          existing.frequency += 1;
-          if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
-            existing.lastBought = receipt.created_at;
-            existing.lastPrice = price;
-          }
-        } else {
-          itemMap.set(name, {
-            name,
-            quantity,
-            lastPrice: price,
-            lastBought: receipt.created_at,
-            frequency: 1,
-          });
-        }
-      });
-    });
-
-    setInventoryItems(Array.from(itemMap.values()));
-  }, [receipts]);
-
   const handleReceiptAdded = async (newReceipt: any) => {
+    const oldReceiptIds = new Set(receipts.map(r => r.id));
     // Refresh receipts from server to get fresh data with all relations
     try {
       const data = await getReceiptsAction();
       setReceipts(data || []);
+
+      // Find new receipts
+      const newReceipts = data.filter((r: any) => !oldReceiptIds.has(r.id));
+
+      // Add items from new receipts to inventory
+      const updatedInventory = [...inventoryItems];
+      newReceipts.forEach((receipt: any) => {
+        receipt.receipt_items?.forEach((item: any) => {
+          const name = item.products?.name || "Unknown";
+          const quantity = item.quantity || 1;
+          const price = item.price || 0;
+          const existing = updatedInventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+          if (existing) {
+            existing.quantity += quantity;
+            existing.frequency += 1;
+            if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
+              existing.lastBought = receipt.created_at;
+              existing.lastPrice = price;
+            }
+          } else {
+            updatedInventory.push({
+              name,
+              quantity,
+              lastPrice: price,
+              lastBought: receipt.created_at,
+              frequency: 1,
+            });
+          }
+        });
+      });
+
+      setInventoryItems(updatedInventory);
+      // Save to database
+      await updateInventoryAction(updatedInventory);
     } catch (error) {
       console.error("Failed to refresh receipts after upload:", error);
       // Fallback: at least add to local state
       setReceipts([...receipts, newReceipt]);
+    }
+  };
+
+  const handleInventoryUpdate = async (updatedItems: InventoryItem[]) => {
+    setInventoryItems(updatedItems);
+    try {
+      await updateInventoryAction(updatedItems);
+    } catch (error) {
+      console.error("Failed to save inventory:", error);
     }
   };
 
@@ -205,7 +224,7 @@ export default function Dashboard() {
                     receipts={receipts} 
                     userCurrency={userProfile.currency}
                     inventoryItems={inventoryItems}
-                    onUpdateInventory={setInventoryItems}
+                    onUpdateInventory={handleInventoryUpdate}
                   />
                 )}
               </>
