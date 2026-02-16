@@ -40,7 +40,42 @@ export default function Dashboard() {
           getInventoryAction()
         ]);
         setReceipts(receiptsData || []);
-        setInventoryItems(inventoryData || []);
+        
+        let finalInventory = inventoryData || [];
+        
+        // If inventory is empty but we have receipts, populate from receipts
+        if (finalInventory.length === 0 && receiptsData && receiptsData.length > 0) {
+          const itemMap = new Map<string, InventoryItem>();
+          receiptsData.forEach((receipt: any) => {
+            receipt.receipt_items?.forEach((item: any) => {
+              const name = item.products?.name || "Unknown";
+              const quantity = item.quantity || 1;
+              const price = item.price || 0;
+              if (itemMap.has(name)) {
+                const existing = itemMap.get(name)!;
+                existing.quantity += quantity;
+                existing.frequency += 1;
+                if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
+                  existing.lastBought = receipt.created_at;
+                  existing.lastPrice = price;
+                }
+              } else {
+                itemMap.set(name, {
+                  name,
+                  quantity,
+                  lastPrice: price,
+                  lastBought: receipt.created_at,
+                  frequency: 1,
+                });
+              }
+            });
+          });
+          finalInventory = Array.from(itemMap.values());
+          // Save to database
+          await updateInventoryAction(finalInventory);
+        }
+        
+        setInventoryItems(finalInventory);
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
