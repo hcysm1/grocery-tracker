@@ -65,7 +65,7 @@ export async function uploadReceiptAction(formData: FormData) {
       .insert({
         store_name: extractedData.store,
         total_amount: extractedData.total,
-        created_at: extractedData.date || new Date().toISOString(),
+        scanned_at: extractedData.date || new Date().toISOString(),
       })
       .select().single();
 
@@ -124,7 +124,7 @@ export async function uploadReceiptAction(formData: FormData) {
         id,
         store_name,
         total_amount,
-        created_at,
+        scanned_at,
         receipt_items (
           id,
           price,
