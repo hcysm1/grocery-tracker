@@ -12,11 +12,14 @@ import { updateInventoryAction } from "@/app/actions/update-inventory";
 
 type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices" | "inventory";
 
+// ✅ 1. UPDATE INTERFACE
+// This must match exactly what getInventoryAction() returns
 interface InventoryItem {
   id?: string;
-  name: string;
-  quantity: number;
-  lastPrice: number;
+  name: string;      
+  quantity: number;  
+  lastPrice: number; 
+  totalValue: number; // Added to match weighted average logic
   lastBought: string;
   frequency: number;
 }
@@ -32,10 +35,6 @@ export default function Dashboard() {
     currency: "MYR"
   });
 
-  /**
-   * REFRESH DATA
-   * The "Source of Truth" logic.
-   */
   const refreshData = useCallback(async () => {
     try {
       setLoading(true);
@@ -46,28 +45,23 @@ export default function Dashboard() {
       
       setReceipts(receiptsData || []);
 
-      // GATEKEEPER: Only generate from receipts if the Inventory table is COMPLETELY empty.
-      // This prevents overwriting your manual edits/renames on refresh.
+      // ✅ 2. FIX INITIAL POPULATION LOGIC
+      // If DB is empty, we aggregate from receipt history
       if ((!inventoryData || inventoryData.length === 0) && receiptsData?.length > 0) {
-        console.log("Database inventory is empty. Populating from history...");
         const itemMap = new Map<string, InventoryItem>();
         
         receiptsData.forEach((receipt: any) => {
           receipt.receipt_items?.forEach((item: any) => {
             const name = item.products?.name || "Unknown";
             const price = Number(item.price) || 0;
+            const qty = Number(item.quantity) || 1;
             
-            // STRICT FILTER: Don't let non-items bloat the value
-            if (
-              name.toLowerCase().includes('discount') || 
-              name.toLowerCase().includes('tax') ||
-              name.toLowerCase().includes('service charge') ||
-              price < 0
-            ) return;
+            if (name.toLowerCase().includes('discount') || price < 0) return;
 
             if (itemMap.has(name)) {
               const existing = itemMap.get(name)!;
-              existing.quantity += (item.quantity || 1);
+              existing.quantity += qty;
+              existing.totalValue += (price * qty); // Summing total value
               existing.frequency += 1;
               if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
                 existing.lastBought = receipt.created_at;
@@ -76,8 +70,9 @@ export default function Dashboard() {
             } else {
               itemMap.set(name, {
                 name,
-                quantity: item.quantity || 1,
+                quantity: qty,
                 lastPrice: price,
+                totalValue: price * qty,
                 lastBought: receipt.created_at || new Date().toISOString(),
                 frequency: 1,
               });
@@ -88,12 +83,12 @@ export default function Dashboard() {
         const initialItems = Array.from(itemMap.values());
         await updateInventoryAction(initialItems);
         
-        // Final fetch to get IDs from DB
         const syncedData = await getInventoryAction();
-        setInventoryItems(syncedData || initialItems);
+        setInventoryItems(syncedData as InventoryItem[]);
       } else {
-        // Database has data! Use it exactly as is.
-        setInventoryItems(inventoryData || []);
+        // ✅ 3. CAST DATA TYPE
+        // Ensure the data from the DB is treated as InventoryItem[]
+        setInventoryItems((inventoryData || []) as InventoryItem[]);
       }
     } catch (error) {
       console.error("Dashboard Sync Error:", error);
@@ -107,16 +102,12 @@ export default function Dashboard() {
   }, [refreshData]);
 
   const handleReceiptAdded = async () => {
-    // When a new receipt is scanned, we sync everything to catch new products
     await refreshData();
     setActiveTab("inventory");
   };
 
   const handleInventoryUpdate = async (updatedItems: InventoryItem[]) => {
-    // 1. Update UI immediately (Snappy)
     setInventoryItems(updatedItems);
-    
-    // 2. Sync to Supabase in background
     try {
       await updateInventoryAction(updatedItems);
     } catch (error) {

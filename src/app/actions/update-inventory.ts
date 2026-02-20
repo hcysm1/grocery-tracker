@@ -6,33 +6,53 @@ import { revalidatePath } from "next/cache";
 export async function updateInventoryAction(inventoryItems: any[]) {
   const supabase = await createClient();
 
-  // Filter out any "Discount" or empty items before they even touch the DB
-  const cleanItems = inventoryItems.filter(item => 
-    item.name && 
-    !item.name.toLowerCase().includes('discount') &&
-    !item.name.toLowerCase().includes('tax')
-  );
+  for (const item of inventoryItems) {
+    if (!item.name || item.name.toLowerCase().includes('discount')) continue;
 
-  const itemsToUpsert = cleanItems.map(item => ({
-    // Use the ID if it exists, otherwise Supabase uses 'name' for the conflict check
-    ...(item.id ? { id: item.id } : {}), 
-    name: item.name.trim(),
-    quantity: Number(item.quantity) || 0,
-    last_price: Number(item.lastPrice) || 0, // MAP CAMELCASE TO SNAKE_CASE
-    last_bought: item.lastBought || new Date().toISOString(),
-    frequency: Number(item.frequency) || 0,
-    updated_at: new Date().toISOString(),
-  }));
+    // 1. Find or Create the Product ID for this name
+    const { data: product } = await supabase
+      .from("products")
+      .select("id")
+      .eq("name", item.name.trim())
+      .single();
 
-  const { error } = await supabase
-    .from("inventory")
-    .upsert(itemsToUpsert, { onConflict: 'name' });
+    if (!product) continue; // Skip if product doesn't exist in products table
 
-  if (error) {
-    console.error("UPSERT ERROR:", error.message);
-    throw error;
+    const qty = Number(item.quantity) || 0;
+    const price = Number(item.lastPrice) || 0;
+    const lineTotal = qty * price;
+
+    // 2. Check if this product is already in inventory
+    const { data: existing } = await supabase
+      .from("inventory")
+      .select("id, total_quantity, total_value")
+      .eq("product_id", product.id)
+      .single();
+
+    if (existing) {
+      // 3. Update existing stock (Additive)
+      await supabase
+        .from("inventory")
+        .update({
+          total_quantity: Number(existing.total_quantity) + qty,
+          total_value: Number(existing.total_value) + lineTotal,
+          last_bought_price: price,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", existing.id);
+    } else {
+      // 4. Insert new inventory record
+      await supabase
+        .from("inventory")
+        .insert({
+          product_id: product.id,
+          total_quantity: qty,
+          total_value: lineTotal,
+          last_bought_price: price
+        });
+    }
   }
 
-  revalidatePath("/");
+  revalidatePath("/inventory");
   return { success: true };
 }
