@@ -92,8 +92,8 @@ export default function Inventory({ receipts, userCurrency, inventoryItems, onUp
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {inventoryItems.map((item) => (
-                <tr key={item.id || item.name} className="hover:bg-slate-50/50 transition">
+              {inventoryItems.map((item,index) => (
+                <tr key={item.id || `item-${index}`} className="hover:bg-slate-50/50 transition">
                   <td className="px-6 py-4 font-medium text-slate-900 capitalize">{item.name}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-3">
