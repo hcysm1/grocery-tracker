@@ -100,7 +100,7 @@ export async function uploadReceiptAction(formData: FormData) {
       return {
         receipt_id: receipt.id,
         product_id: matchedProduct?.id,
-        price: item.price,
+        unit_price: item.price,
         quantity: item.quantity || 1,
       };
     });
@@ -127,7 +127,8 @@ export async function uploadReceiptAction(formData: FormData) {
         scanned_at,
         receipt_items (
           id,
-          price,
+          unit_price,
+          total_price,
           quantity,
           products (
             name

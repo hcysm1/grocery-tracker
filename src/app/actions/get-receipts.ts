@@ -14,7 +14,8 @@ export async function getReceiptsAction() {
       scanned_at,
       receipt_items (
         id,
-        price,
+        unit_price,
+        total_price,
         quantity,
         products (
           name
