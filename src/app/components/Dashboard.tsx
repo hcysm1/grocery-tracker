@@ -12,14 +12,13 @@ import { updateInventoryAction } from "@/app/actions/update-inventory";
 
 type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices" | "inventory";
 
-// ✅ 1. UPDATE INTERFACE
-// This must match exactly what getInventoryAction() returns
+// ✅ 1. INTERFACE ALIGNMENT
 interface InventoryItem {
   id?: string;
   name: string;      
   quantity: number;  
   lastPrice: number; 
-  totalValue: number; // Added to match weighted average logic
+  totalValue: number; 
   lastBought: string;
   frequency: number;
 }
@@ -45,26 +44,34 @@ export default function Dashboard() {
       
       setReceipts(receiptsData || []);
 
-      // ✅ 2. FIX INITIAL POPULATION LOGIC
-      // If DB is empty, we aggregate from receipt history
+      // ✅ 2. AGGREGATION LOGIC (For initial setup or sync)
       if ((!inventoryData || inventoryData.length === 0) && receiptsData?.length > 0) {
         const itemMap = new Map<string, InventoryItem>();
         
         receiptsData.forEach((receipt: any) => {
+          // SAFE DATE: Fallback chain to prevent "Invalid Date" crashes
+          const receiptDate = receipt.scanned_at || receipt.created_at || new Date().toISOString();
+
           receipt.receipt_items?.forEach((item: any) => {
             const name = item.products?.name || "Unknown";
-            const price = Number(item.price) || 0;
+            const price = Number(item.unit_price) || 0; // ✅ UPDATED: Schema uses 'unit_price'
             const qty = Number(item.quantity) || 1;
             
+            // Skip discounts or bad data
             if (name.toLowerCase().includes('discount') || price < 0) return;
 
             if (itemMap.has(name)) {
               const existing = itemMap.get(name)!;
               existing.quantity += qty;
-              existing.totalValue += (price * qty); // Summing total value
+              existing.totalValue += (price * qty); 
               existing.frequency += 1;
-              if (new Date(receipt.scanned_at) > new Date(existing.lastBought)) {
-                existing.lastBought = receipt.scanned_at;
+              
+              // Safe date comparison
+              const existingDate = new Date(existing.lastBought).getTime();
+              const newDate = new Date(receiptDate).getTime();
+
+              if (!isNaN(newDate) && newDate > existingDate) {
+                existing.lastBought = receiptDate;
                 existing.lastPrice = price;
               }
             } else {
@@ -73,7 +80,7 @@ export default function Dashboard() {
                 quantity: qty,
                 lastPrice: price,
                 totalValue: price * qty,
-                lastBought: receipt.created_at || new Date().toISOString(),
+                lastBought: receiptDate, // ✅ UPDATED: Uses safe receiptDate
                 frequency: 1,
               });
             }
@@ -87,7 +94,6 @@ export default function Dashboard() {
         setInventoryItems(syncedData as InventoryItem[]);
       } else {
         // ✅ 3. CAST DATA TYPE
-        // Ensure the data from the DB is treated as InventoryItem[]
         setInventoryItems((inventoryData || []) as InventoryItem[]);
       }
     } catch (error) {
