@@ -16,7 +16,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
     const months = new Map<string, any>();
 
     receipts.forEach((receipt) => {
-      const date = new Date(receipt.created_at);
+      const date = new Date(receipt.scanned_at);
       const monthKey = date.toISOString().slice(0, 7); // YYYY-MM
       const monthLabel = date.toLocaleDateString("en-MY", { year: "numeric", month: "long" });
 
@@ -65,8 +65,10 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
     currentMonthData.items.forEach((item: any) => {
       const name = item.products?.name || "Unknown";
       const current = itemMap.get(name) || { name, count: 0, total: 0 };
-      current.count += item.quantity || 1;
-      current.total += (item.price || 0) * (item.quantity || 1);
+      const qty = Number(item.quantity) || 1;
+      const price = Number(item.unit_price) || 0;
+      current.count += qty;
+      current.total += price * qty;
       itemMap.set(name, current);
     });
 

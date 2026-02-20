@@ -16,7 +16,7 @@ export default function PriceTracker({ receipts, userCurrency }: PriceTrackerPro
     const itemMap = new Map<string, Array<{ date: string; price: number; quantity: number }>>();
 
     receipts.forEach((receipt) => {
-      const date = new Date(receipt.created_at);
+      const date = new Date(receipt.scanned_at);
       const dateLabel = date.toLocaleDateString("en-MY", { year: "numeric", month: "short", day: "numeric" });
 
       receipt.receipt_items?.forEach((item: any) => {
@@ -26,7 +26,7 @@ export default function PriceTracker({ receipts, userCurrency }: PriceTrackerPro
         }
         itemMap.get(itemName)!.push({
           date: dateLabel,
-          price: item.price || 0,
+          price: Number(item.unit_price) || 0,
           quantity: item.quantity || 1,
         });
       });
