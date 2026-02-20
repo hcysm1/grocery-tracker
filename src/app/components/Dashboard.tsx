@@ -63,8 +63,8 @@ export default function Dashboard() {
               existing.quantity += qty;
               existing.totalValue += (price * qty); // Summing total value
               existing.frequency += 1;
-              if (new Date(receipt.created_at) > new Date(existing.lastBought)) {
-                existing.lastBought = receipt.created_at;
+              if (new Date(receipt.scanned_at) > new Date(existing.lastBought)) {
+                existing.lastBought = receipt.scanned_at;
                 existing.lastPrice = price;
               }
             } else {

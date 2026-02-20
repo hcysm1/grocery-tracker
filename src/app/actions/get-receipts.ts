@@ -11,7 +11,7 @@ export async function getReceiptsAction() {
       id,
       store_name,
       total_amount,
-      created_at,
+      scanned_at,
       receipt_items (
         id,
         price,
@@ -21,7 +21,7 @@ export async function getReceiptsAction() {
         )
       )
     `)
-    .order("created_at", { ascending: false });
+    .order("scanned_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching receipts:", error);
