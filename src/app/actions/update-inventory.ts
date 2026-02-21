@@ -20,7 +20,7 @@ export async function updateInventoryAction(inventoryItems: any[]) {
 
     const qty = Number(item.quantity) || 0;
     const price = Number(item.lastPrice) || 0;
-    const lineTotal = qty * price;
+    const totalCost = qty * price;
 
     // 2. Check if this product is already in inventory
     const { data: existing } = await supabase
@@ -30,12 +30,12 @@ export async function updateInventoryAction(inventoryItems: any[]) {
       .single();
 
     if (existing) {
-      // 3. Update existing stock (Additive)
+      
       await supabase
         .from("inventory")
         .update({
-          total_quantity: Number(existing.total_quantity) + qty,
-          total_value: Number(existing.total_value) + lineTotal,
+          total_quantity:qty,
+          total_value: totalCost,
           last_bought_price: price,
           updated_at: new Date().toISOString()
         })
@@ -47,7 +47,7 @@ export async function updateInventoryAction(inventoryItems: any[]) {
         .insert({
           product_id: product.id,
           total_quantity: qty,
-          total_value: lineTotal,
+          total_value: totalCost,
           last_bought_price: price
         });
     }
