@@ -114,49 +114,6 @@ export async function uploadReceiptAction(formData: FormData) {
       throw new Error(`Items Insert Failed: ${itemsError.message}`);
     }
 
-    // 4. UPDATE INVENTORY
-    console.log(" [STEP 8]: Updating Inventory...");
-    for (const item of extractedData.items) {
-      const matchedProduct = products.find(
-        (p) => p.name.toLowerCase() === item.name.toLowerCase().trim()
-      );
-      if (!matchedProduct) continue;
-
-      const qty = Number(item.quantity) || 1;
-      const price = Number(item.price) || 0;
-      const totalCost = qty * price;
-
-      // Check if inventory exists for this product
-      const { data: existing } = await supabase
-        .from("inventory")
-        .select("id, total_quantity, total_value")
-        .eq("product_id", matchedProduct.id)
-        .single();
-
-      if (existing) {
-        // Update existing
-        await supabase
-          .from("inventory")
-          .update({
-            total_quantity: Number(existing.total_quantity) + qty,
-            total_value: Number(existing.total_value) + totalCost,
-            last_bought_price: price,
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", existing.id);
-      } else {
-        // Insert new
-        await supabase
-          .from("inventory")
-          .insert({
-            product_id: matchedProduct.id,
-            total_quantity: qty,
-            total_value: totalCost,
-            last_bought_price: price
-          });
-      }
-    }
-
     console.log(" [SUCCESS]: All data saved.");
     revalidatePath("/");
     
