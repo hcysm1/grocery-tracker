@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Package, Plus, Minus, Trash2, Edit, Check, X, Info } from "lucide-react";
+import { useMemo, } from "react";
+import { Package, Plus, Minus, Trash2 } from "lucide-react";
 
 interface InventoryItem {
   id?: string;
