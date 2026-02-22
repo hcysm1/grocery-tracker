@@ -31,7 +31,11 @@ export async function uploadReceiptAction(formData: FormData) {
     const prompt = `
       Analyze this grocery receipt. 
       Extract store name, total, and the DATE on the receipt (YYYY-MM-DD).
-      Extract all items and prices. Standardize names (e.g., "Whole Milk").
+      Extract all items following these rules:
+      1. Unit Price: Capture price AFTER '@'.
+      2. Variations: List same name with DIFFERENT prices as separate entries.
+      3. Grouping: Sum quantities for EXACT same name AND price.
+      4. Exclude: Discounts, Savings, Tax, Subtotal.
       Return JSON ONLY:
       {"store": "string", "date": "string", "total": number, "items": [{"name": "string", "price": number, "quantity": number}]}
     `;
