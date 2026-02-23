@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "GroceryTrack - Smart Receipt Management",
-  description: "Smart grocery receipt scanner with price tracking and inventory management powered by Gemini AI",
+  description: "Smart grocery receipt scanner with price tracking powered by Gemini AI",
 };
 
 export default function RootLayout({

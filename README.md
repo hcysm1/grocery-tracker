@@ -1,13 +1,12 @@
-# GroceryTrack - Professional Receipt & Inventory Management System
+# GroceryTrack - Professional Receipt Management System
 
 ## 📱 Project Overview
 
-**GroceryTrack** is a modern, professional-grade grocery receipt management and price tracking application. It enables users to scan receipts using their phone camera, automatically extract item data using Google's Gemini 2.5 Flash AI, and provides comprehensive analytics for spending patterns, price history, inventory management, and price comparison across Malaysian retailers.
+**GroceryTrack** is a modern, professional-grade grocery receipt management and price tracking application. It enables users to scan receipts using their phone camera, automatically extract item data using Google's Gemini 2.5 Flash AI, and provides comprehensive analytics for spending patterns, price history, and price comparison across Malaysian retailers.
 
 ### Perfect for:
 - Personal grocery budget tracking
 - Household expense management  
-- Inventory monitoring
 - Price comparison and savings optimization
 - Portfolio demonstration of modern web technologies
 
@@ -48,17 +47,7 @@
 - **Visual Trend Chart**: Line graph showing how prices fluctuate
 - **Most Tracked Items**: Top 10 frequently purchased products
 
-### 4. **📦 Inventory Management**
-- **Add/Remove Items**: Manage items you have at home
-- **Quantity Tracking**: Increase/decrease quantities with buttons
-- **Inventory Stats**:
-  - Total item count
-  - Total quantity
-  - Estimated value (based on last prices)
-- **Suggested Items**: Recommendations based on purchase history
-- **One-Click Add**: Add frequently bought items from suggestions
-
-### 5. **💰 Malaysian Price Comparison**
+### 4. ** Malaysian Price Comparison**
 - **Multi-Retailer Comparison**: Compare prices across 5+ major retailers:
   - Tesco Malaysia
   - Giant Hypermarket
@@ -101,7 +90,6 @@ Tables:
 - receipt_items (individual items)
 - products (product catalog)
 - users (user profiles - optional)
-- inventory (user's home inventory)
 ```
 
 ### Key Libraries
@@ -138,7 +126,6 @@ Tables:
 │ - Receipts │                                           │
 │ - Monthly  │                                           │
 │ - Prices   │                                           │
-│ - Inventory│                                           │
 │ - Scraper  │                                           │
 │            │                                           │
 └────────────┴──────────────────────────────────────────┘
@@ -209,7 +196,6 @@ src/
 │   │       ├── ReceiptScanner.tsx (Scan receipts)
 │   │       ├── MonthlyDashboard.tsx (Monthly view + charts)
 │   │       ├── PriceTracker.tsx (Price history)
-│   │       ├── Inventory.tsx (Inventory mgmt)
 │   │       └── PriceScraper.tsx (Price comparison)
 │   ├── actions/
 │   │   └── upload-receipt.ts (Server action)

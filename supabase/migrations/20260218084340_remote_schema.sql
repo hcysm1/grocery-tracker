@@ -56,19 +56,6 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 
-CREATE TABLE IF NOT EXISTS "public"."inventory" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "product_id" "uuid",
-    "total_quantity" numeric(10,2) DEFAULT 0,
-    "total_value" numeric(10,2) DEFAULT 0,
-    "last_bought_price" numeric(10,2),
-    "updated_at" timestamp with time zone DEFAULT "now"()
-);
-
-
-ALTER TABLE "public"."inventory" OWNER TO "postgres";
-
-
 CREATE TABLE IF NOT EXISTS "public"."price_history" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "product_id" "uuid",
@@ -116,16 +103,6 @@ CREATE TABLE IF NOT EXISTS "public"."receipts" (
 ALTER TABLE "public"."receipts" OWNER TO "postgres";
 
 
-ALTER TABLE ONLY "public"."inventory"
-    ADD CONSTRAINT "inventory_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."inventory"
-    ADD CONSTRAINT "inventory_product_id_key" UNIQUE ("product_id");
-
-
-
 ALTER TABLE ONLY "public"."price_history"
     ADD CONSTRAINT "price_history_pkey" PRIMARY KEY ("id");
 
@@ -148,11 +125,6 @@ ALTER TABLE ONLY "public"."receipt_items"
 
 ALTER TABLE ONLY "public"."receipts"
     ADD CONSTRAINT "receipts_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."inventory"
-    ADD CONSTRAINT "inventory_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE CASCADE;
 
 
 
@@ -345,12 +317,6 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
-
-
-
-GRANT ALL ON TABLE "public"."inventory" TO "anon";
-GRANT ALL ON TABLE "public"."inventory" TO "authenticated";
-GRANT ALL ON TABLE "public"."inventory" TO "service_role";
 
 
 

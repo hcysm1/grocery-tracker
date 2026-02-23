@@ -4,30 +4,15 @@ import { useState, useEffect, useCallback } from "react";
 import ReceiptScanner from "./modules/ReceiptScanner";
 import MonthlyDashboard from "./modules/MonthlyDashboard";
 import PriceTracker from "./modules/PriceTracker";
-import Inventory from "./modules/Inventory";
-import { Sheet, Home, TrendingUp, Package, Settings, Loader2 } from "lucide-react";
+import { Sheet, Home, TrendingUp, Settings, Loader2 } from "lucide-react";
 import { getReceiptsAction } from "@/app/actions/get-receipts";
-import { getInventoryAction } from "@/app/actions/get-inventory";
-import { updateInventoryAction } from "@/app/actions/update-inventory";
 
-type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices" | "inventory";
-
-// ✅ 1. INTERFACE ALIGNMENT
-interface InventoryItem {
-  id?: string;
-  name: string;      
-  quantity: number;  
-  lastPrice: number; 
-  totalValue: number; 
-  lastBought: string;
-  frequency: number;
-}
+type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
   const [receipts, setReceipts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [userProfile] = useState({
     name: "User",
     email: "user@example.com",
@@ -37,65 +22,9 @@ export default function Dashboard() {
   const refreshData = useCallback(async () => {
     try {
       setLoading(true);
-      const [receiptsData, inventoryData] = await Promise.all([
-        getReceiptsAction(),
-        getInventoryAction()
-      ]);
+      const receiptsData = await getReceiptsAction();
       
       setReceipts(receiptsData || []);
-
-      // ✅ 2. AGGREGATION LOGIC (For initial setup or sync)
-      if ((!inventoryData || inventoryData.length === 0) && receiptsData?.length > 0) {
-        const itemMap = new Map<string, InventoryItem>();
-        
-        receiptsData.forEach((receipt: any) => {
-          // SAFE DATE: Fallback chain to prevent "Invalid Date" crashes
-          const receiptDate = receipt.scanned_at || receipt.created_at || new Date().toISOString();
-
-          receipt.receipt_items?.forEach((item: any) => {
-            const name = item.products?.name || "Unknown";
-            const price = Number(item.unit_price) || 0; // ✅ UPDATED: Schema uses 'unit_price'
-            const qty = Number(item.quantity) || 1;
-            
-            // Skip discounts or bad data
-            if (name.toLowerCase().includes('discount') || price < 0) return;
-
-            if (itemMap.has(name)) {
-              const existing = itemMap.get(name)!;
-              existing.quantity += qty;
-              existing.totalValue += (price * qty); 
-              existing.frequency += 1;
-              
-              // Safe date comparison
-              const existingDate = new Date(existing.lastBought).getTime();
-              const newDate = new Date(receiptDate).getTime();
-
-              if (!isNaN(newDate) && newDate > existingDate) {
-                existing.lastBought = receiptDate;
-                existing.lastPrice = price;
-              }
-            } else {
-              itemMap.set(name, {
-                name,
-                quantity: qty,
-                lastPrice: price,
-                totalValue: price * qty,
-                lastBought: receiptDate, // ✅ UPDATED: Uses safe receiptDate
-                frequency: 1,
-              });
-            }
-          });
-        });
-        
-        const initialItems = Array.from(itemMap.values());
-        await updateInventoryAction(initialItems);
-        
-        const syncedData = await getInventoryAction();
-        setInventoryItems(syncedData as InventoryItem[]);
-      } else {
-        // ✅ 3. CAST DATA TYPE
-        setInventoryItems((inventoryData || []) as InventoryItem[]);
-      }
     } catch (error) {
       console.error("Dashboard Sync Error:", error);
     } finally {
@@ -109,23 +38,12 @@ export default function Dashboard() {
 
   const handleReceiptAdded = async () => {
     await refreshData();
-    setActiveTab("inventory");
-  };
-
-  const handleInventoryUpdate = async (updatedItems: InventoryItem[]) => {
-    setInventoryItems(updatedItems);
-    try {
-      await updateInventoryAction(updatedItems);
-    } catch (error) {
-      console.error("Failed to persist inventory changes:", error);
-    }
   };
 
   const navigationItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "receipts", label: "Scan Receipts", icon: Sheet },
     { id: "prices", label: "Price History", icon: TrendingUp },
-    { id: "inventory", label: "Inventory", icon: Package },
   ];
 
   return (
@@ -197,7 +115,7 @@ export default function Dashboard() {
         {/* MAIN CONTENT */}
         <main className="flex-1">
           <div className="max-w-5xl mx-auto p-6 lg:p-10">
-            {!loading || receipts.length > 0 || inventoryItems.length > 0 ? (
+            {!loading || receipts.length > 0 ? (
               <div className="animate-in fade-in duration-500">
                 {activeTab === "dashboard" && (
                   <MonthlyDashboard receipts={receipts} userCurrency={userProfile.currency} />
@@ -207,14 +125,6 @@ export default function Dashboard() {
                 )}
                 {activeTab === "prices" && (
                   <PriceTracker receipts={receipts} userCurrency={userProfile.currency} />
-                )}
-                {activeTab === "inventory" && (
-                  <Inventory 
-                    receipts={receipts} 
-                    userCurrency={userProfile.currency}
-                    inventoryItems={inventoryItems}
-                    onUpdateInventory={handleInventoryUpdate}
-                  />
                 )}
               </div>
             ) : (

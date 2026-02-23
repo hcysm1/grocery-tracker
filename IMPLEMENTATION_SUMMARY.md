@@ -34,16 +34,7 @@ Your professional grocery tracker app is now **complete and production-ready**! 
 - ✅ Top 10 most tracked items
 - ✅ Price change indicators (up/down %)
 
-### 4. **Inventory Manager Module**
-📍 Location: `src/app/components/modules/Inventory.tsx`
-- ✅ Add/remove items
-- ✅ Quantity adjustment (+ and - buttons)
-- ✅ Inventory value tracking
-- ✅ Suggested items (from purchase history)
-- ✅ One-click add from suggestions
-- ✅ Inventory table with controls
-
-### 5. **Price Scraper Module**
+### 4. **Price Scraper Module**
 📍 Location: `src/app/components/modules/PriceScraper.tsx`
 - ✅ Product search
 - ✅ 6+ Malaysian retailers (Tesco, Giant, MyDin, etc.)
@@ -72,7 +63,6 @@ src/app/
 │       ├── ReceiptScanner.tsx
 │       ├── MonthlyDashboard.tsx
 │       ├── PriceTracker.tsx
-│       ├── Inventory.tsx
 │       └── PriceScraper.tsx
 ├── dashboard/
 │   └── page.tsx (Entry point)
@@ -100,7 +90,6 @@ src/app/
 - ✅ **Items**: Name, price, quantity per receipt
 - ✅ **Prices**: Historical price per item per month
 - ✅ **Stores**: Spending breakdown by retailer
-- ✅ **Inventory**: Current home stock quantities
 
 ### Analytics Provided:
 - ✅ Monthly spending totals
@@ -131,7 +120,7 @@ src/app/
 
 ### Database
 ✅ Supabase PostgreSQL
-✅ Tables: receipts, receipt_items, products, inventory
+✅ Tables: receipts, receipt_items, products
 ✅ Proper relationships & foreign keys
 ✅ Indexes for query performance
 
@@ -192,13 +181,6 @@ d:\grocery-tracker\
 - 🔢 Price statistics
 - 👀 Top 10 items
 - ⬆️⬇️ Change indicators
-
-### Inventory Management
-- ➕➖ Add/remove items
-- 📦 Quantity counting
-- 💰 Value estimation
-- 💡 Smart suggestions
-- 📋 Item table
 
 ### Price Comparison
 - 🔍 Product search
@@ -274,7 +256,6 @@ This project demonstrates:
 - [ ] Scan a test receipt
 - [ ] Explore each module
 - [ ] Test price comparison
-- [ ] Create sample inventory
 
 ---
 

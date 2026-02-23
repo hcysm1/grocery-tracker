@@ -46,7 +46,6 @@ Visit: http://localhost:3000/dashboard
 | **Scan Receipt** | Click "Scan Receipts" → Take/upload photo | 10 sec |
 | **View Monthly** | Click "Monthly View" → Select month → View charts | 2 min |
 | **Price History** | Click "Price History" → Select item → See trend | 2 min |
-| **Inventory** | Click "Inventory" → Add items → Track quantity | 3 min |
 | **Price Compare** | Click "Price Compare" → Search product → Compare retailers | 2 min |
 
 ---
@@ -58,8 +57,6 @@ Visit: http://localhost:3000/dashboard
 2. 📸 Scan a receipt (or use sample data)
 3. 📊 View Monthly Dashboard
 4. 💰 Compare prices on items from receipt
-5. 📦 Add frequent items to inventory
-
 ---
 
 ## 🔧 Troubleshooting
@@ -95,7 +92,6 @@ Key files for each feature:
 Receipt Scanner    → src/app/components/modules/ReceiptScanner.tsx
 Monthly Dashboard  → src/app/components/modules/MonthlyDashboard.tsx
 Price History      → src/app/components/modules/PriceTracker.tsx
-Inventory          → src/app/components/modules/Inventory.tsx
 Price Compare      → src/app/components/modules/PriceScraper.tsx
 Main Dashboard     → src/app/components/Dashboard.tsx
 ```

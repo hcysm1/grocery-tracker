@@ -8,7 +8,6 @@ You now have a **professional, full-featured grocery tracking app** that:
 ✅ **Extracts data** automatically using AI
 ✅ **Tracks spending** by month with charts
 ✅ **Monitors prices** to find savings
-✅ **Manages inventory** at home
 ✅ **Compares retailers** for best deals
 
 ---
@@ -57,15 +56,7 @@ You now have a **professional, full-featured grocery tracking app** that:
 - When to buy (best prices)
 - Most bought items
 
-### 4️⃣ **Inventory** 📦
-**What**: What groceries you have at home
-**Can**:
-- Add items you bought
-- Track quantities
-- See total value
-- Get smart suggestions
-
-### 5️⃣ **Price Compare** 🏪
+### 4️⃣ **Price Compare** 🏪
 **What**: Compare prices across stores
 **Covers**: Tesco, Giant, MyDin, Aeon, Carrefour, Jusco
 **Shows**: 
@@ -97,13 +88,6 @@ You now have a **professional, full-featured grocery tracking app** that:
 3. See all store prices
 4. Shop at cheapest store
 5. Save money! 💰
-
-### Home: Manage Stock
-1. Go to **"Inventory"**
-2. Add groceries you bought
-3. Adjust quantities as you use items
-4. See what needs buying
-5. Plan next trip
 
 ### Analytics: Understand Patterns
 1. Go to **"Price History"**
@@ -164,11 +148,10 @@ Your App
 Code Files:
 └── src/app/components/
     ├── Dashboard.tsx (main hub)
-    └── modules/ (5 features)
+    └── modules/ (4 features)
         ├── ReceiptScanner.tsx
         ├── MonthlyDashboard.tsx
         ├── PriceTracker.tsx
-        ├── Inventory.tsx
         └── PriceScraper.tsx
 
 Config Files:
@@ -245,7 +228,6 @@ Go to: http://localhost:3000/dashboard
 ✅ Real data visualization
 ✅ Advanced analytics
 ✅ Multi-retailer comparison
-✅ Inventory tracking
 
 ### Tech Showcase
 ✅ Modern React with Hooks
@@ -326,8 +308,7 @@ Go to: http://localhost:3000/dashboard
 - 📸 Read receipts with AI
 - 📊 Show spending charts
 - 💰 Find best prices
-- 📦 Track inventory
-- 📈 Predict savings
+-  Predict savings
 - 🏪 Compare 6+ stores
 
 **A portfolio project that shows:**

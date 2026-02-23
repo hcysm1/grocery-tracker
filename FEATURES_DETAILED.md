@@ -137,62 +137,7 @@ Highest Price    Price Change %
 
 ---
 
-## 📦 Module 4: Inventory Manager
-
-### Location
-`src/app/components/modules/Inventory.tsx`
-
-### Add Items
-#### Input Form
-- Item name text input
-- Quantity number input (default: 1)
-- Add button
-- Enter key support
-
-#### Item Suggestions
-- Based on purchase history
-- Shows frequency (how many times bought)
-- Displays last price
-- One-click add to inventory
-- Popular items highlighted
-
-### Item Management
-#### For Each Item:
-- Item name (capitalize display)
-- Current quantity buttons:
-  - **+** button: Increase by 1
-  - **-** button: Decrease by 1
-  - Display current quantity
-  - Auto-remove at 0 quantity
-
-#### Item Metrics:
-- Last price paid
-- Total value (qty × last price)
-- Delete button (red)
-
-### Inventory Statistics (3 Cards)
-```
-Total Items      Total Quantity      Estimated Value
-(Unique items)   (Sum all quantities) (Qty × Last Price)
-```
-
-### Inventory Table
-- Scrollable on mobile
-- Clean, organized display
-- Easy quantity adjustment
-- Quick delete option
-- Easy to scan all items
-
-### Suggested Items
-- From purchase history
-- Shows how many times bought
-- Shows last price
-- Click to add one to inventory
-- Updated as receipts added
-
----
-
-## 💰 Module 5: Price Comparison (Malaysian Retailers)
+## � Module 4: Price Comparison (Malaysian Retailers)
 
 ### Location
 `src/app/components/modules/PriceScraper.tsx`
@@ -306,8 +251,7 @@ Tips for each search:
 2. 📸 Scan Receipts
 3. 📈 Monthly View
 4. 💰 Price History
-5. 📦 Inventory
-6. 🔍 Price Compare
+5.  Price Compare
 
 ### Content Area
 - Main content changes with selected tab

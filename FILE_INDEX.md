@@ -19,7 +19,7 @@ This document lists every file created/modified and what it does.
 - Quick stats panel
 
 **Features**:
-- 6 tabs: Dashboard, Scan, Monthly, Prices, Inventory, Compare
+- 5 tabs: Dashboard, Scan, Monthly, Prices, Compare
 - Responsive layout
 - Sticky header
 - Beautiful styling
@@ -72,19 +72,6 @@ This document lists every file created/modified and what it does.
 - Historical data tracking
 
 **What it does**: Shows how prices change for items you buy
-
----
-
-### `src/app/components/modules/Inventory.tsx` 📦
-**Manage home inventory**
-- Add items interface
-- Quantity adjustment buttons
-- Inventory stats (3 cards)
-- Item table with controls
-- Suggested items from history
-- Value calculation
-
-**What it does**: Tracks groceries at home and their estimated value
 
 ---
 
@@ -269,7 +256,6 @@ d:\grocery-tracker\
 │   │   │       ├── ReceiptScanner.tsx 📸
 │   │   │       ├── MonthlyDashboard.tsx 📊
 │   │   │       ├── PriceTracker.tsx 💹
-│   │   │       ├── Inventory.tsx 📦
 │   │   │       └── PriceScraper.tsx 💰
 │   │   ├── actions/
 │   │   │   └── upload-receipt.ts 🔧
@@ -323,7 +309,6 @@ Dashboard Hub
   ├→ Receipt Scanner (Camera → AI extraction)
   ├→ Monthly View (Charts & statistics)
   ├→ Price History (Trends over time)
-  ├→ Inventory (Home stock tracking)
   └→ Price Compare (Store comparison)
 ```
 
@@ -352,7 +337,6 @@ Environment
 - Receipts (store, date, total)
 - Items (name, price, quantity)
 - Products (product catalog)
-- Inventory (home stock)
 
 ### In Browser (Temporary)
 - UI state
