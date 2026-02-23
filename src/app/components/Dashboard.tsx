@@ -3,11 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import ReceiptScanner from "./modules/ReceiptScanner";
 import MonthlyDashboard from "./modules/MonthlyDashboard";
-import PriceTracker from "./modules/PriceTracker";
-import { Sheet, Home, TrendingUp, Settings, Loader2 } from "lucide-react";
+import { Sheet, Home, Settings, Loader2 } from "lucide-react";
 import { getReceiptsAction } from "@/app/actions/get-receipts";
 
-type ActiveTab = "dashboard" | "receipts" | "monthly" | "prices";
+type ActiveTab = "dashboard" | "receipts" | "monthly";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
@@ -43,7 +42,6 @@ export default function Dashboard() {
   const navigationItems = [
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "receipts", label: "Scan Receipts", icon: Sheet },
-    { id: "prices", label: "Price History", icon: TrendingUp },
   ];
 
   return (
@@ -122,9 +120,6 @@ export default function Dashboard() {
                 )}
                 {activeTab === "receipts" && (
                   <ReceiptScanner onReceiptAdded={handleReceiptAdded} />
-                )}
-                {activeTab === "prices" && (
-                  <PriceTracker receipts={receipts} userCurrency={userProfile.currency} />
                 )}
               </div>
             ) : (

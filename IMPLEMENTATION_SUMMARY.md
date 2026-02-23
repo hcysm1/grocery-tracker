@@ -26,15 +26,7 @@ Your professional grocery tracker app is now **complete and production-ready**! 
 - ✅ Monthly trend comparison chart
 - ✅ Interactive month selector
 
-### 3. **Price History Module**
-📍 Location: `src/app/components/modules/PriceTracker.tsx`
-- ✅ Historical price tracking
-- ✅ Price statistics (min, max, avg, change %)
-- ✅ Line chart showing price trends
-- ✅ Top 10 most tracked items
-- ✅ Price change indicators (up/down %)
-
-### 4. **Price Scraper Module**
+### 3. **Price Scraper Module**
 📍 Location: `src/app/components/modules/PriceScraper.tsx`
 - ✅ Product search
 - ✅ 6+ Malaysian retailers (Tesco, Giant, MyDin, etc.)
@@ -62,7 +54,6 @@ src/app/
 │   └── modules/
 │       ├── ReceiptScanner.tsx
 │       ├── MonthlyDashboard.tsx
-│       ├── PriceTracker.tsx
 │       └── PriceScraper.tsx
 ├── dashboard/
 │   └── page.tsx (Entry point)

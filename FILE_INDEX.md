@@ -62,19 +62,6 @@ This document lists every file created/modified and what it does.
 
 ---
 
-### `src/app/components/modules/PriceTracker.tsx` 💹
-**Track price history over time**
-- Item selector dropdown
-- 5 price statistic cards
-- Line chart showing trends
-- Price change indicators
-- Top 10 items list
-- Historical data tracking
-
-**What it does**: Shows how prices change for items you buy
-
----
-
 ### `src/app/components/modules/PriceScraper.tsx` 💰
 **Compare prices across Malaysian retailers**
 - Product search
@@ -255,7 +242,6 @@ d:\grocery-tracker\
 │   │   │   └── modules/
 │   │   │       ├── ReceiptScanner.tsx 📸
 │   │   │       ├── MonthlyDashboard.tsx 📊
-│   │   │       ├── PriceTracker.tsx 💹
 │   │   │       └── PriceScraper.tsx 💰
 │   │   ├── actions/
 │   │   │   └── upload-receipt.ts 🔧
@@ -308,7 +294,6 @@ d:\grocery-tracker\
 Dashboard Hub
   ├→ Receipt Scanner (Camera → AI extraction)
   ├→ Monthly View (Charts & statistics)
-  ├→ Price History (Trends over time)
   └→ Price Compare (Store comparison)
 ```
 

@@ -36,18 +36,7 @@
   - Monthly trend comparison
 - **Month Selection**: Easy switching between months
 
-### 3. **📈 Price History Tracking**
-- **Historical Price Data**: Track price changes for each item over time
-- **Price Statistics**:
-  - Current price
-  - Average price
-  - Lowest price (highlighted)
-  - Highest price
-  - Price change percentage
-- **Visual Trend Chart**: Line graph showing how prices fluctuate
-- **Most Tracked Items**: Top 10 frequently purchased products
-
-### 4. ** Malaysian Price Comparison**
+### 3. ** Malaysian Price Comparison**
 - **Multi-Retailer Comparison**: Compare prices across 5+ major retailers:
   - Tesco Malaysia
   - Giant Hypermarket
@@ -195,7 +184,6 @@ src/
 │   │   └── modules/
 │   │       ├── ReceiptScanner.tsx (Scan receipts)
 │   │       ├── MonthlyDashboard.tsx (Monthly view + charts)
-│   │       ├── PriceTracker.tsx (Price history)
 │   │       └── PriceScraper.tsx (Price comparison)
 │   ├── actions/
 │   │   └── upload-receipt.ts (Server action)

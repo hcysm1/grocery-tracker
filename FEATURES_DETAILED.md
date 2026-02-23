@@ -94,48 +94,10 @@ Top 5 items by total spending:
 
 ---
 
-## 📈 Module 3: Price History Tracker
+## � Module 3: Price Comparison (Malaysian Retailers)
 
 ### Location
-`src/app/components/modules/PriceTracker.tsx`
-
-### Item Selection
-- Dropdown showing all items from receipts
-- Sorted by number of records (most frequent first)
-- Quick switch between items
-- Shows record count per item
-
-### Price Statistics (5 Cards)
-```
-Current Price    Average Price    Lowest Price
-  (Latest)       (Mean of all)     (Minimum)
-
-Highest Price    Price Change %
-  (Maximum)      (From first to last)
-```
-
-### Price Trend Chart
-- X-axis: Date
-- Y-axis: Price in currency
-- Line showing price movement
-- Data points marked
-- Tooltip on hover
-- Shows complete history
-
-### Historical Data Shown
-- Purchase date
-- Price at that time
-- Quantity bought
-- Chronological order
-
-### Price Analytics
-- Calculate min/max prices
-- Compute average
-- Determine trend direction
-- Calculate % change
-- Identify price spikes
-
----
+`src/app/components/modules/PriceScraper.tsx`
 
 ## � Module 4: Price Comparison (Malaysian Retailers)
 
@@ -234,7 +196,7 @@ Tips for each search:
 
 #### Desktop (Sidebar)
 - Fixed left sidebar
-- 6 module tabs
+- 4 module tabs
 - Active tab highlighted
 - Quick stats panel:
   - Total Spent
@@ -250,8 +212,7 @@ Tips for each search:
 1. 📊 Dashboard (main)
 2. 📸 Scan Receipts
 3. 📈 Monthly View
-4. 💰 Price History
-5.  Price Compare
+4.  Price Compare
 
 ### Content Area
 - Main content changes with selected tab

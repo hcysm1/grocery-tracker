@@ -45,7 +45,6 @@ Visit: http://localhost:3000/dashboard
 |---------|-----------|------|
 | **Scan Receipt** | Click "Scan Receipts" → Take/upload photo | 10 sec |
 | **View Monthly** | Click "Monthly View" → Select month → View charts | 2 min |
-| **Price History** | Click "Price History" → Select item → See trend | 2 min |
 | **Price Compare** | Click "Price Compare" → Search product → Compare retailers | 2 min |
 
 ---
@@ -91,7 +90,6 @@ Key files for each feature:
 ```
 Receipt Scanner    → src/app/components/modules/ReceiptScanner.tsx
 Monthly Dashboard  → src/app/components/modules/MonthlyDashboard.tsx
-Price History      → src/app/components/modules/PriceTracker.tsx
 Price Compare      → src/app/components/modules/PriceScraper.tsx
 Main Dashboard     → src/app/components/Dashboard.tsx
 ```

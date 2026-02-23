@@ -56,18 +56,6 @@ SET default_tablespace = '';
 SET default_table_access_method = "heap";
 
 
-CREATE TABLE IF NOT EXISTS "public"."price_history" (
-    "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
-    "product_id" "uuid",
-    "price" numeric(10,2),
-    "store_name" "text",
-    "purchase_date" "date" DEFAULT CURRENT_DATE
-);
-
-
-ALTER TABLE "public"."price_history" OWNER TO "postgres";
-
-
 CREATE TABLE IF NOT EXISTS "public"."products" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "name" "text" NOT NULL,
@@ -103,10 +91,6 @@ CREATE TABLE IF NOT EXISTS "public"."receipts" (
 ALTER TABLE "public"."receipts" OWNER TO "postgres";
 
 
-ALTER TABLE ONLY "public"."price_history"
-    ADD CONSTRAINT "price_history_pkey" PRIMARY KEY ("id");
-
-
 
 ALTER TABLE ONLY "public"."products"
     ADD CONSTRAINT "products_name_key" UNIQUE ("name");
@@ -125,11 +109,6 @@ ALTER TABLE ONLY "public"."receipt_items"
 
 ALTER TABLE ONLY "public"."receipts"
     ADD CONSTRAINT "receipts_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."price_history"
-    ADD CONSTRAINT "price_history_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "public"."products"("id") ON DELETE CASCADE;
 
 
 
@@ -317,12 +296,6 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
-
-
-
-GRANT ALL ON TABLE "public"."price_history" TO "anon";
-GRANT ALL ON TABLE "public"."price_history" TO "authenticated";
-GRANT ALL ON TABLE "public"."price_history" TO "service_role";
 
 
 

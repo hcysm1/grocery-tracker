@@ -48,15 +48,7 @@ You now have a **professional, full-featured grocery tracking app** that:
 - Average per trip
 - Charts showing what you spent on
 
-### 3️⃣ **Price History** 💹
-**What**: Track how prices change over time
-**Shows**:
-- Line chart of price trends
-- Cheapest/most expensive prices
-- When to buy (best prices)
-- Most bought items
-
-### 4️⃣ **Price Compare** 🏪
+### 3️⃣ **Price Compare** 🏪
 **What**: Compare prices across stores
 **Covers**: Tesco, Giant, MyDin, Aeon, Carrefour, Jusco
 **Shows**: 
@@ -88,13 +80,6 @@ You now have a **professional, full-featured grocery tracking app** that:
 3. See all store prices
 4. Shop at cheapest store
 5. Save money! 💰
-
-### Analytics: Understand Patterns
-1. Go to **"Price History"**
-2. Select an item
-3. See price trend
-4. Identify best buying time
-5. Make smart decisions
 
 ---
 
@@ -148,10 +133,9 @@ Your App
 Code Files:
 └── src/app/components/
     ├── Dashboard.tsx (main hub)
-    └── modules/ (4 features)
+    └── modules/ (3 features)
         ├── ReceiptScanner.tsx
         ├── MonthlyDashboard.tsx
-        ├── PriceTracker.tsx
         └── PriceScraper.tsx
 
 Config Files:
