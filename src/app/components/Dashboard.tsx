@@ -20,7 +20,7 @@ interface InventoryItem {
   lastPrice: number; 
   totalValue: number; 
   lastBought: string;
-  frequency: number;
+  
 }
 
 export default function Dashboard() {
@@ -43,59 +43,8 @@ export default function Dashboard() {
       ]);
       
       setReceipts(receiptsData || []);
-
-      // ✅ 2. AGGREGATION LOGIC (For initial setup or sync)
-      if ((!inventoryData || inventoryData.length === 0) && receiptsData?.length > 0) {
-        const itemMap = new Map<string, InventoryItem>();
-        
-        receiptsData.forEach((receipt: any) => {
-          // SAFE DATE: Fallback chain to prevent "Invalid Date" crashes
-          const receiptDate = receipt.scanned_at || receipt.created_at || new Date().toISOString();
-
-          receipt.receipt_items?.forEach((item: any) => {
-            const name = item.products?.name || "Unknown";
-            const price = Number(item.unit_price) || 0; // ✅ UPDATED: Schema uses 'unit_price'
-            const qty = Number(item.quantity) || 1;
-            
-            // Skip discounts or bad data
-            if (name.toLowerCase().includes('discount') || price < 0) return;
-
-            if (itemMap.has(name)) {
-              const existing = itemMap.get(name)!;
-              existing.quantity += qty;
-              existing.totalValue += (price * qty); 
-              existing.frequency += 1;
-              
-              // Safe date comparison
-              const existingDate = new Date(existing.lastBought).getTime();
-              const newDate = new Date(receiptDate).getTime();
-
-              if (!isNaN(newDate) && newDate > existingDate) {
-                existing.lastBought = receiptDate;
-                existing.lastPrice = price;
-              }
-            } else {
-              itemMap.set(name, {
-                name,
-                quantity: qty,
-                lastPrice: price,
-                totalValue: price * qty,
-                lastBought: receiptDate, // ✅ UPDATED: Uses safe receiptDate
-                frequency: 1,
-              });
-            }
-          });
-        });
-        
-        const initialItems = Array.from(itemMap.values());
-        await updateInventoryAction(initialItems);
-        
-        const syncedData = await getInventoryAction();
-        setInventoryItems(syncedData as InventoryItem[]);
-      } else {
-        // ✅ 3. CAST DATA TYPE
-        setInventoryItems((inventoryData || []) as InventoryItem[]);
-      }
+      setInventoryItems((inventoryData || []) as InventoryItem[]);
+      
     } catch (error) {
       console.error("Dashboard Sync Error:", error);
     } finally {

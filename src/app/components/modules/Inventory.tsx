@@ -9,8 +9,8 @@ interface InventoryItem {
   quantity: number;
   lastPrice: number;
   totalValue: number;
-  lastBought: string;
-  frequency: number;
+  lastBought: string
+
 }
 
 interface InventoryProps {
