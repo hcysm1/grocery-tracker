@@ -54,17 +54,17 @@ export default function Dashboard() {
 
           receipt.receipt_items?.forEach((item: any) => {
             const name = item.products?.name || "Unknown";
-            const price = Number(item.unit_price) || 0; 
+            const price = Number(item.unit_price) || 0; // ✅ UPDATED: Schema uses 'unit_price'
             const qty = Number(item.quantity) || 1;
             
-          
-          
+            // Skip discounts or bad data
+            if (name.toLowerCase().includes('discount') || price < 0) return;
 
             if (itemMap.has(name)) {
               const existing = itemMap.get(name)!;
               existing.quantity += qty;
               existing.totalValue += (price * qty); 
-              
+            
               
               // Safe date comparison
               const existingDate = new Date(existing.lastBought).getTime();
