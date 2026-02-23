@@ -26,7 +26,7 @@ export async function uploadReceiptAction(formData: FormData) {
     // Using v1 for stability and 1.5-flash
     const model = genAI.getGenerativeModel({ 
       model: "gemini-3-flash-preview", 
-    }, { apiVersion: 'v1' });
+    }, { apiVersion: 'v1beta' });
 
     const prompt = `
       Analyze this grocery receipt. 
