@@ -20,7 +20,7 @@ interface InventoryItem {
   lastPrice: number; 
   totalValue: number; 
   lastBought: string;
-  
+  frequency: number;
 }
 
 export default function Dashboard() {
@@ -64,7 +64,7 @@ export default function Dashboard() {
               const existing = itemMap.get(name)!;
               existing.quantity += qty;
               existing.totalValue += (price * qty); 
-            
+              existing.frequency += 1;
               
               // Safe date comparison
               const existingDate = new Date(existing.lastBought).getTime();
@@ -81,7 +81,7 @@ export default function Dashboard() {
                 lastPrice: price,
                 totalValue: price * qty,
                 lastBought: receiptDate, // ✅ UPDATED: Uses safe receiptDate
-              
+                frequency: 1,
               });
             }
           });
