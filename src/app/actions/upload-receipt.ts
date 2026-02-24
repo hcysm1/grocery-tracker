@@ -37,7 +37,7 @@ export async function uploadReceiptAction(formData: FormData) {
       2. Variations: List same name with DIFFERENT prices as separate entries.
       3. Grouping: Sum quantities for EXACT same name AND price.
       4. Exclude: Discounts, Savings, Tax, Subtotal.
-      5. Name Standardization: Simplify and standardize item names (e.g., change "CHICK BONELESS" or "CHICK FILLET" to "Chicken", "P/APPLE CHUNKS" to "Pineapple", "RED ONION - KG" to "Onion"). Remove weights, brand names, and codes from the name.
+      5. Name Standardization: Simplify and standardize item names (e.g., change "CHICK BONELESS" to "Boneless Chicken", CHIK FILLET to "Chicken Fillet", "P/APPLE CHUNKS" to "Pineapple Chunks", "RED ONION - KG" to "Onion", keep different types of products in separate rows like yogurt and greek yogurt are different). Remove weights, brand names, and codes from the name.
       
       Return JSON ONLY:
       {"store": "string", "date": "string", "total": number, "items": [{"name": "string", "price": number, "quantity": number}]}
