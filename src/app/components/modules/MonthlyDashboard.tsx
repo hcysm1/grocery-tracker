@@ -92,10 +92,10 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
     <div className="space-y-6">
      {/* Header Section */}
       <div className="flex justify-between items-end">
-        
+        <div>
           <h1 className="text-2xl font-bold">Monthly Dashboard</h1>
           <p className="text-slate-500 text-sm">Track your spending patterns by month</p>   
-        
+        </div>
       </div>
 
       {/* MONTH SELECTOR */}
