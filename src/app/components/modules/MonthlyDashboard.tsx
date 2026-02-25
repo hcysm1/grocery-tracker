@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { StatsCard } from './StatsCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Calendar, Wallet, ShoppingCart, AlertCircle } from "lucide-react";
+import { TrendingUp, Calendar, Wallet, ShoppingCart, AlertCircle, Package } from "lucide-react";
 
 interface MonthlyDashboardProps {
   receipts: any[];
@@ -119,46 +120,11 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
       </div>
 
       {/* KEY METRICS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-blue-600 font-semibold">Total Spent</p>
-              <p className="text-3xl font-bold text-blue-900 mt-2">{userCurrency} {currentMonthData.total.toFixed(2)}</p>
-            </div>
-            <Wallet className="text-blue-300" size={40} />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-purple-600 font-semibold">Receipts</p>
-              <p className="text-3xl font-bold text-purple-900 mt-2">{currentMonthData.count}</p>
-            </div>
-            <ShoppingCart className="text-purple-300" size={40} />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-green-600 font-semibold">Avg. Per Trip</p>
-              <p className="text-3xl font-bold text-green-900 mt-2">{userCurrency} {currentMonthData.average}</p>
-            </div>
-            <TrendingUp className="text-green-300" size={40} />
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-orange-600 font-semibold">Avg. Per Day</p>
-              <p className="text-3xl font-bold text-orange-900 mt-2">{userCurrency} {(currentMonthData.total / 30).toFixed(2)}</p>
-            </div>
-            <Calendar className="text-orange-300" size={40} />
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <StatsCard title="Total Spent" value={currentMonthData.total.toFixed(2)} sub="Total Spent this month" icon={<Wallet className="text-blue-300" />} />
+      <StatsCard title="Total Receipts" value={currentMonthData.count} sub="Total Receipts this month" icon={<ShoppingCart className="text-blue-300" />} />
+      <StatsCard title="Avg. Per Trip" value={currentMonthData.average} sub="Average spent per receipt" icon={<TrendingUp className="text-green-300" />} />
+      <StatsCard title="Avg. Per Day" value={(currentMonthData.total / 30).toFixed(2)} sub="Average spent per day" icon={<Calendar className="text-orange-300" />} />
       </div>
 
       {/* CHARTS */}
