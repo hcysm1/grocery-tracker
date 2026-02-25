@@ -1,9 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { StatsCard } from './StatsCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Calendar, Wallet, ShoppingCart, AlertCircle, ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { TrendingUp, Calendar, Wallet, ShoppingCart, AlertCircle } from "lucide-react";
 
 interface MonthlyDashboardProps {
   receipts: any[];
@@ -12,32 +11,6 @@ interface MonthlyDashboardProps {
 
 export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDashboardProps) {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
-
-  // Format the date for the UI (e.g., "December 2023")
-  const displayDate = currentDate.toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
-
-  // handle previous buttons
-  const handlePreviousMonth = () => {
-      setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() - 1);
-      return newDate;
-    });
-  };
-  
-  //handle next buttons
-  const handleNextMonth = () => {
-      setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() + 1);
-      return newDate;
-    });
-  };
-
 
   const monthlyData = useMemo(() => {
     const months = new Map<string, any>();
@@ -117,30 +90,32 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
+     {/* Header Section */}
       <div className="flex justify-between items-end">
-        <div>
-          <h1 className="text-2xl font-bold">Inventory Management</h1>
-          <p className="text-slate-500 text-sm">Track and manage your inventory</p>   
-        </div>
-         <button className="bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-slate-800 transition">
-          <Plus size={18} />
-          Add Item
-         </button>
+        
+          <h1 className="text-2xl font-bold">Monthly Dashboard</h1>
+          <p className="text-slate-500 text-sm">Track your spending patterns by month</p>   
+        
       </div>
 
-      {/* Month Selector */}
-      <div className="bg-white rounded-xl p-4 mb-8 shadow-sm border border-slate-100 flex items-center justify-between">
-        <button className="p-2 hover:bg-gray-100 rounded-lg border border-slate-200" onClick={handlePreviousMonth}>
-          <ChevronLeft size={20} />
-        </button>
-        <div className="text-center">
-          <h2 className="text-lg font-semibold">{displayDate}</h2>
-          <p className="text-sm text-gray-600 mt-1">Monthly Inventory Overview</p>
+      {/* MONTH SELECTOR */}
+      <div className="bg-white rounded-lg border border-slate-200 p-4">
+        <label className="block text-sm font-semibold text-slate-700 mb-3">Select Month</label>
+        <div className="flex flex-wrap gap-2">
+          {monthlyData.map((month) => (
+            <button
+              key={month.key}
+              onClick={() => setSelectedMonth(month.key)}
+              className={`px-4 py-2 rounded-lg transition border ${
+                selectedMonth === month.key || (selectedMonth === null && month === monthlyData[monthlyData.length - 1])
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-slate-100 text-slate-700 border-slate-200 hover:border-blue-400"
+              }`}
+            >
+              {month.label}
+            </button>
+          ))}
         </div>
-        <button className="p-2 hover:bg-gray-100 rounded-lg border border-slate-200" onClick={handleNextMonth}>
-          <ChevronRight size={20} />
-        </button>
       </div>
 
       {/* KEY METRICS */}
