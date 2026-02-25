@@ -21,6 +21,8 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
     year: 'numeric',
   });
 
+  const currentViewKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+
   // handle previous buttons
   const handlePreviousMonth = () => {
       setCurrentDate((prev) => {
@@ -83,7 +85,9 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
       .sort((a, b) => a.key.localeCompare(b.key));
   }, [receipts]);
 
-  const currentMonthData = selectedMonth ? monthlyData.find((m) => m.key === selectedMonth) : monthlyData[monthlyData.length - 1];
+  const currentMonthData = monthlyData.find((m) => m.key === currentViewKey);
+
+
 
   const topItems = useMemo(() => {
     if (!currentMonthData) return [];
@@ -125,27 +129,9 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
         </div>
       </div>
 
-      {/* MONTH SELECTOR */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <label className="block text-sm font-semibold text-slate-700 mb-3">Select Month</label>
-        <div className="flex flex-wrap gap-2">
-          {monthlyData.map((month) => (
-            <button
-              key={month.key}
-              onClick={() => setSelectedMonth(month.key)}
-              className={`px-4 py-2 rounded-lg transition border ${
-                selectedMonth === month.key || (selectedMonth === null && month === monthlyData[monthlyData.length - 1])
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-slate-100 text-slate-700 border-slate-200 hover:border-blue-400"
-              }`}
-            >
-              {month.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
-           {/* Month Selector */}
+
+      {/* Month Selector */}
       <div className="bg-white rounded-xl p-4 mb-8 shadow-sm border border-slate-100 flex items-center justify-between">
         <button className="p-2 hover:bg-gray-100 rounded-lg border border-slate-200" onClick={handlePreviousMonth}>
           <ChevronLeft size={20} />
