@@ -121,10 +121,10 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
 
       {/* KEY METRICS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <StatsCard title="Total Spent" value={currentMonthData.total.toFixed(2)} sub="Total Spent this month" icon={<Wallet className="text-blue-300" />} />
-      <StatsCard title="Total Receipts" value={currentMonthData.count} sub="Total Receipts this month" icon={<ShoppingCart className="text-blue-300" />} />
-      <StatsCard title="Avg. Per Trip" value={currentMonthData.average} sub="Average spent per receipt" icon={<TrendingUp className="text-green-300" />} />
-      <StatsCard title="Avg. Per Day" value={(currentMonthData.total / 30).toFixed(2)} sub="Average spent per day" icon={<Calendar className="text-orange-300" />} />
+      <StatsCard title="Total Spent" value={currentMonthData.total.toFixed(2)} sub="Total Spent this month" icon={<Wallet className="text-blue-500" />} />
+      <StatsCard title="Total Receipts" value={currentMonthData.count} sub="Total Receipts this month" icon={<ShoppingCart className="text-blue-500" />} />
+      <StatsCard title="Avg. Per Trip" value={currentMonthData.average} sub="Average spent per receipt" icon={<TrendingUp className="text-green-500" />} />
+      <StatsCard title="Avg. Per Day" value={(currentMonthData.total / 30).toFixed(2)} sub="Average spent per day" icon={<Calendar className="text-orange-500" />} />
       </div>
 
       {/* CHARTS */}
