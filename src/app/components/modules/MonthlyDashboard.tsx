@@ -153,23 +153,55 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white border border-slate-200 rounded-lg p-6">
-              <h3 className="font-bold mb-4">Store Breakdown</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie data={currentMonthData.stores} dataKey="amount" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
-                    {currentMonthData.stores.map((_: any, index: number) => (
-                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: any) => {
-                      if (value === undefined || value === null) return [`${userCurrency} 0.00`, 'Amount'];
-                      return [`${userCurrency} ${Number(value).toFixed(2)}`, 'Amount'];
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+            {/* Store Breakdown Card */}
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-slate-800">Store Breakdown</h3>
+                <span className="text-xs font-medium px-2 py-1 bg-blue-50 text-blue-600 rounded-full">
+                  {currentMonthData.stores.length} Stores
+                </span>
+              </div>
+
+              <div className="flex flex-col md:flex-row items-center justify-between">
+                <div className="w-full md:w-1/2 h-[200px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={currentMonthData.stores}
+                        dataKey="amount"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}    /* Makes it a donut */
+                        outerRadius={80}
+                        paddingAngle={5}
+                      >
+                        {currentMonthData.stores.map((_: any, index: number) => (
+                          <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Custom Side Legend */}
+                <div className="w-full md:w-1/2 space-y-3 mt-4 md:mt-0 md:pl-4">
+                  {currentMonthData.stores.slice(0, 4).map((store: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                        <span className="text-slate-600 truncate max-w-[100px]">{store.name}</span>
+                      </div>
+                      <span className="font-semibold text-slate-800">
+                        {((store.amount / currentMonthData.total) * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="bg-white border border-slate-200 rounded-lg p-6">
