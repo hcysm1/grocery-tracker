@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { StatsCard } from './StatsCard';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Calendar, Wallet, ShoppingCart, AlertCircle, ChevronLeft, ChevronRight} from "lucide-react";
+import { TrendingUp, Calendar, Wallet, ShoppingCart, AlertCircle, ChevronLeft, ChevronRight, ReceiptText } from "lucide-react";
 
 interface MonthlyDashboardProps {
   receipts: any[];
@@ -15,7 +15,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
   const [currentDate, setCurrentDate] = useState(new Date());
 
 
-   // Format the date for the UI (e.g., "December 2023")
+  // Format the date for the UI (e.g., "December 2023")
   const displayDate = currentDate.toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
@@ -25,16 +25,16 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
 
   // handle previous buttons
   const handlePreviousMonth = () => {
-      setCurrentDate((prev) => {
+    setCurrentDate((prev) => {
       const newDate = new Date(prev);
       newDate.setMonth(newDate.getMonth() - 1);
       return newDate;
     });
   };
-  
+
   //handle next buttons
   const handleNextMonth = () => {
-      setCurrentDate((prev) => {
+    setCurrentDate((prev) => {
       const newDate = new Date(prev);
       newDate.setMonth(newDate.getMonth() + 1);
       return newDate;
@@ -87,7 +87,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
 
   const currentMonthData = monthlyData.find((m) => m.key === currentViewKey);
 
-
+  ////////CURRENTLY WORKING ON THIS PART
 
   const topItems = useMemo(() => {
     if (!currentMonthData) return [];
@@ -108,24 +108,17 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
       .slice(0, 5);
   }, [currentMonthData]);
 
-  if (!currentMonthData) {
-    return (
-      <div className="text-center py-12">
-        <AlertCircle className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-        <p className="text-slate-600">No receipt data available. Start by scanning a receipt.</p>
-      </div>
-    );
-  }
+
 
   const COLORS = ["#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#06B6D4"];
 
   return (
     <div className="space-y-6">
-     {/* Header Section */}
+      {/* Header Section */}
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-bold">Monthly Dashboard</h1>
-          <p className="text-slate-500 text-sm">Track your spending patterns by month</p>   
+          <p className="text-slate-500 text-sm">Track your spending patterns by month</p>
         </div>
       </div>
 
@@ -144,65 +137,58 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
           <ChevronRight size={20} />
         </button>
       </div>
-
-      {/* KEY METRICS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <StatsCard title="Total Spent" value={currentMonthData.total.toFixed(2)} sub="Total Spent this month" icon={<Wallet className="text-blue-500" />} />
-      <StatsCard title="Total Receipts" value={currentMonthData.count} sub="Total Receipts this month" icon={<ShoppingCart className="text-blue-500" />} />
-      <StatsCard title="Avg. Per Trip" value={currentMonthData.average} sub="Average spent per receipt" icon={<TrendingUp className="text-green-500" />} />
-      <StatsCard title="Avg. Per Day" value={(currentMonthData.total / 30).toFixed(2)} sub="Average spent per day" icon={<Calendar className="text-orange-500" />} />
-      </div>
-
-      {/* CHARTS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* STORE BREAKDOWN */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
-          <h3 className="font-bold text-slate-900 mb-4">Store Breakdown</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie data={currentMonthData.stores} dataKey="amount" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                {currentMonthData.stores.map((entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value: any) => `${userCurrency} ${value.toFixed(2)}`} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+      {!currentMonthData ? (
+        <div className="bg-white rounded-xl border-2 border-dashed border-slate-200 py-20 text-center">
+          <ReceiptText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-slate-900">No recipes scanned for {displayDate}</h3>
         </div>
-
-        {/* TOP ITEMS */}
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
-          <h3 className="font-bold text-slate-900 mb-4">Top Items</h3>
-          <div className="space-y-3">
-            {topItems.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="font-medium text-slate-900 capitalize">{item.name}</p>
-                  <p className="text-sm text-slate-500">Qty: {item.count}</p>
-                </div>
-                <p className="font-bold text-slate-900">{userCurrency} {item.total.toFixed(2)}</p>
-              </div>
-            ))}
+      ) : (
+        /* Everything below is wrapped in the "else" condition */
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatsCard title="Total Spent" value={currentMonthData.total.toFixed(2)} sub={`${userCurrency}`} icon={<Wallet className="text-blue-500" />} />
+            <StatsCard title="Receipts" value={currentMonthData.count} sub="Trips" icon={<ShoppingCart className="text-blue-500" />} />
+            <StatsCard title="Avg. Trip" value={currentMonthData.average} sub="Per visit" icon={<TrendingUp className="text-green-500" />} />
+            <StatsCard title="Avg. Day" value={(currentMonthData.total / 30).toFixed(2)} sub="Daily" icon={<Calendar className="text-orange-500" />} />
           </div>
-        </div>
-      </div>
 
-      {/* MONTHLY TREND - Only show if multiple months */}
-      {monthlyData.length > 1 && (
-        <div className="bg-white border border-slate-200 rounded-lg p-6">
-          <h3 className="font-bold text-slate-900 mb-4">Monthly Trend</h3>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="label" />
-              <YAxis />
-              <Tooltip formatter={(value: any) => `${userCurrency} ${value.toFixed(2)}`} />
-              <Bar dataKey="total" fill="#3B82F6" name="Total Spent" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white border border-slate-200 rounded-lg p-6">
+              <h3 className="font-bold mb-4">Store Breakdown</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie data={currentMonthData.stores} dataKey="amount" nameKey="name" cx="50%" cy="50%" outerRadius={80}>
+                    {currentMonthData.stores.map((_: any, index: number) => (
+                      <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: any) => {
+                      if (value === undefined || value === null) return [`${userCurrency} 0.00`, 'Amount'];
+                      return [`${userCurrency} ${Number(value).toFixed(2)}`, 'Amount'];
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-lg p-6">
+              <h3 className="font-bold mb-4">Top Items</h3>
+              {topItems.map((item, i) => (
+                <div key={i} className="flex justify-between py-2 border-b last:border-0">
+                  <span className="capitalize">{item.name}</span>
+                  <span className="font-bold">{userCurrency} {item.total.toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
 }
+
+
+
+
+
