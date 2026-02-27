@@ -204,14 +204,41 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
               </div>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-lg p-6">
-              <h3 className="font-bold mb-4">Top Items</h3>
-              {topItems.map((item, i) => (
-                <div key={i} className="flex justify-between py-2 border-b last:border-0">
-                  <span className="capitalize">{item.name}</span>
-                  <span className="font-bold">{userCurrency} {item.total.toFixed(2)}</span>
-                </div>
-              ))}
+            {/* Top Items Card */}
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-slate-800">Top Items</h3>
+                <TrendingUp size={18} className="text-slate-400" />
+              </div>
+
+              <div className="space-y-5">
+                {topItems.map((item, i) => {
+                  // Calculate percentage of the most expensive item for the progress bar width
+                  const maxTotal = topItems[0].total;
+                  const barWidth = (item.total / maxTotal) * 100;
+
+                  return (
+                    <div key={i} className="relative">
+                      <div className="flex justify-between items-center mb-1 relative z-10">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-slate-700 capitalize">{item.name}</span>
+                          <span className="text-xs text-slate-400">Qty: {item.count}</span>
+                        </div>
+                        <span className="text-sm font-bold text-slate-900">
+                          {userCurrency} {item.total.toFixed(2)}
+                        </span>
+                      </div>
+                      {/* Background Progress Bar */}
+                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-blue-500/20 rounded-full border-r-2 border-blue-500"
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </>
