@@ -213,9 +213,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
 
               <div className="space-y-5">
                 {topItems.map((item, i) => {
-                  // Calculate percentage of the most expensive item for the progress bar width
-                  const maxTotal = topItems[0].total;
-                  const barWidth = (item.total / maxTotal) * 100;
+
 
                   return (
                     <div key={i} className="relative">
@@ -228,13 +226,8 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
                           {userCurrency} {item.total.toFixed(2)}
                         </span>
                       </div>
-                      {/* Background Progress Bar */}
-                      <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500/20 rounded-full border-r-2 border-blue-500"
-                          style={{ width: `${barWidth}%` }}
-                        />
-                      </div>
+
+
                     </div>
                   );
                 })}
