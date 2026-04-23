@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { StatsCard } from './StatsCard';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Calendar, Wallet, ShoppingCart, AlertCircle, ChevronLeft, ChevronRight, ReceiptText } from "lucide-react";
+import { Tooltip,ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { TrendingUp, Calendar, Wallet, ShoppingCart,ChevronLeft, ChevronRight, ReceiptText } from "lucide-react";
 
 interface MonthlyDashboardProps {
   receipts: any[];
@@ -11,7 +11,6 @@ interface MonthlyDashboardProps {
 }
 
 export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDashboardProps) {
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
 
 
@@ -87,7 +86,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
 
   const currentMonthData = monthlyData.find((m) => m.key === currentViewKey);
 
-  ////////CURRENTLY WORKING ON THIS PART
+  
 
   const topItems = useMemo(() => {
     if (!currentMonthData) return [];
