@@ -30,7 +30,7 @@ export async function uploadReceiptAction(formData: FormData) {
 
     const prompt = `
       Analyze this grocery receipt.
-      Extract store name, total, and the DATE on the receipt (DD-MM-YYYY).
+      Extract store name, total, and the DATE on the receipt in this format = (YYYY-MM-DD).
       
       Extract all items following these rules:
       1. Unit Price: Capture price AFTER '@'.
