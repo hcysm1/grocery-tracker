@@ -130,7 +130,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
         </button>
         <div className="text-center">
           <h2 className="text-lg font-semibold">{displayDate}</h2>
-          <p className="text-sm text-gray-600 mt-1">Monthly Inventory Overview</p>
+          <p className="text-sm text-gray-600 mt-1">Monthly Spending Overview</p>
         </div>
         <button className="p-2 hover:bg-gray-100 rounded-lg border border-slate-200" onClick={handleNextMonth}>
           <ChevronRight size={20} />
