@@ -44,7 +44,7 @@ Extract all items following these rules:
    "Bakery", "Beverages", "Snacks", "Frozen Foods", "Pantry & Condiments",
    "Household", "Personal Care", "Baby Products", "Cleaning Product", "Other"
 7. **Emoji**: Assign a single relevant emoji (e.g., 🍗, 🥛, 🍎).
-8. **Duplicate Prevention**: Combine entries with the EXACT same name and price by adding quantities.
+8. **Duplicate Prevention**: Combine entries with the EXACT same name and price by adding quantities for e.g if there are multiple entries for oil standardize the name to vegetable oil and add the quantity.
 
 Return JSON ONLY:
 {
