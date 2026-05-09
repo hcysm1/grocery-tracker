@@ -45,6 +45,8 @@ Extract all items following these rules:
    "Household", "Personal Care", "Baby Products", "Cleaning Product", "Other"
 7. **Emoji**: Assign a single relevant emoji (e.g., 🍗, 🥛, 🍎).
 8. **Duplicate Prevention**: Combine entries with the EXACT same name and price by adding quantities for e.g if there are multiple entries for oil standardize the name to vegetable oil and add the quantity.
+9. **Data Validation**: Ensure all extracted data is valid and complete.
+10. **if there are any discounts please apply to the total price if not applied. Always double check**
 
 Return JSON ONLY:
 {
