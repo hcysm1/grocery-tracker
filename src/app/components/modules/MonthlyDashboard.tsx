@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { StatsCard } from './StatsCard';
-import { Tooltip,ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Calendar, Wallet, ShoppingCart,ChevronLeft, ChevronRight, ReceiptText } from "lucide-react";
+import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { TrendingUp, Calendar, Wallet, ShoppingCart, ChevronLeft, ChevronRight, ReceiptText, Tag } from "lucide-react";
 
 interface MonthlyDashboardProps {
   receipts: any[];
@@ -13,8 +13,7 @@ interface MonthlyDashboardProps {
 export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDashboardProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-
-  // Format the date for the UI (e.g., "December 2023")
+  // Format the date for the UI (e.g., "December 2026")
   const displayDate = currentDate.toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
@@ -22,7 +21,6 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
 
   const currentViewKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
 
-  // handle previous buttons
   const handlePreviousMonth = () => {
     setCurrentDate((prev) => {
       const newDate = new Date(prev);
@@ -31,7 +29,6 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
     });
   };
 
-  //handle next buttons
   const handleNextMonth = () => {
     setCurrentDate((prev) => {
       const newDate = new Date(prev);
@@ -64,7 +61,6 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
       monthData.count += 1;
       monthData.items.push(...(receipt.receipt_items || []));
 
-      // Track store spending
       const current = monthData.stores.get(receipt.store_name) || 0;
       monthData.stores.set(receipt.store_name, current + (receipt.total_amount || 0));
     });
@@ -86,17 +82,34 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
 
   const currentMonthData = monthlyData.find((m) => m.key === currentViewKey);
 
-  
-
   const topItems = useMemo(() => {
     if (!currentMonthData) return [];
-    const itemMap = new Map<string, { name: string; count: number; total: number }>();
+    
+    const itemMap = new Map<string, { 
+      name: string; 
+      count: number; 
+      total: number; 
+      emoji: string; 
+      unit: string;
+      category: string;
+    }>();
 
     currentMonthData.items.forEach((item: any) => {
-      const name = item.products?.name || "Unknown";
-      const current = itemMap.get(name) || { name, count: 0, total: 0 };
+      const product = item.products;
+      const name = product?.name || "Unknown";
+      
+      const current = itemMap.get(name) || { 
+        name, 
+        count: 0, 
+        total: 0, 
+        emoji: product?.emoji || "📦", // Fallback emoji
+        unit: item.unit || "pc",       // Defaults to pc from schema
+        category: product?.category || "Other" // Support for new category field
+      };
+
       const qty = Number(item.quantity) || 1;
       const price = Number(item.unit_price) || 0;
+      
       current.count += qty;
       current.total += price * qty;
       itemMap.set(name, current);
@@ -107,13 +120,10 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
       .slice(0, 5);
   }, [currentMonthData]);
 
-
-
   const COLORS = ["#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#06B6D4"];
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-2xl font-bold">Monthly Dashboard</h1>
@@ -121,9 +131,6 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
         </div>
       </div>
 
-
-
-      {/* Month Selector */}
       <div className="bg-white rounded-xl p-4 mb-8 shadow-sm border border-slate-100 flex items-center justify-between">
         <button className="p-2 hover:bg-gray-100 rounded-lg border border-slate-200" onClick={handlePreviousMonth}>
           <ChevronLeft size={20} />
@@ -136,13 +143,13 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
           <ChevronRight size={20} />
         </button>
       </div>
+
       {!currentMonthData ? (
         <div className="bg-white rounded-xl border-2 border-dashed border-slate-200 py-20 text-center">
           <ReceiptText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-slate-900">No recipes scanned for {displayDate}</h3>
+          <h3 className="text-lg font-medium text-slate-900">No receipts scanned for {displayDate}</h3>
         </div>
       ) : (
-        /* Everything below is wrapped in the "else" condition */
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard title="Total Spent" value={currentMonthData.total.toFixed(2)} sub={`${userCurrency}`} icon={<Wallet className="text-blue-500" />} />
@@ -152,7 +159,6 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Store Breakdown Card */}
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-bold text-slate-800">Store Breakdown</h3>
@@ -171,7 +177,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}    /* Makes it a donut */
+                        innerRadius={60}
                         outerRadius={80}
                         paddingAngle={5}
                       >
@@ -186,7 +192,6 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
                   </ResponsiveContainer>
                 </div>
 
-                {/* Custom Side Legend */}
                 <div className="w-full md:w-1/2 space-y-3 mt-4 md:mt-0 md:pl-4">
                   {currentMonthData.stores.slice(0, 4).map((store: any, i: number) => (
                     <div key={i} className="flex items-center justify-between text-sm">
@@ -203,7 +208,6 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
               </div>
             </div>
 
-            {/* Top Items Card */}
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="font-bold text-slate-800">Top Items</h3>
@@ -211,25 +215,36 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
               </div>
 
               <div className="space-y-5">
-                {topItems.map((item, i) => {
-
-
-                  return (
-                    <div key={i} className="relative">
-                      <div className="flex justify-between items-center mb-1 relative z-10">
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-slate-700 capitalize">{item.name}</span>
-                          <span className="text-xs text-slate-400">Qty: {item.count}</span>
-                        </div>
-                        <span className="text-sm font-bold text-slate-900">
-                          {userCurrency} {item.total.toFixed(2)}
-                        </span>
+                {topItems.map((item, i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      {/* Emoji & Metadata Display */}
+                      <div className="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center text-xl shadow-sm border border-slate-100">
+                        {item.emoji}
                       </div>
-
-
+                      
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-slate-700 capitalize">
+                          {item.name}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                            {item.category}
+                          </span>
+                          <span className="text-xs text-slate-400">
+                            {item.count} {item.unit}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  );
-                })}
+
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-slate-900 block">
+                        {userCurrency} {item.total.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -238,8 +253,3 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
     </div>
   );
 }
-
-
-
-
-

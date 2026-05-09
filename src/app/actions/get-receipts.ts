@@ -17,8 +17,12 @@ export async function getReceiptsAction() {
         unit_price,
         total_price,
         quantity,
+        unit,
         products (
-          name
+          name,
+          brand,
+          category,
+          emoji
         )
       )
     `)
