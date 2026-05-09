@@ -40,9 +40,9 @@ Extract all items following these rules:
 4. **Unit**: Extract unit (kg, g, liter, ml, pc, packet, bottle). Default to "pc" if unknown.
 5. **Brand**: Extract the brand name (e.g., "Nestle") or return null.
 6. **Category**: You MUST use EXACTLY one of these categories:
-   "Fruits", "Vegetables", "Meat & Poultry", "Seafood", "Dairy & Eggs",
+   "Fruits", "Vegetables", "Meat & Poultry", "Dairy & Eggs",
    "Bakery", "Beverages", "Snacks", "Frozen Foods", "Pantry & Condiments",
-   "Household", "Personal Care", "Baby Products", "Cleaning Product", "Other"
+   "Household", "Personal Care", "Cleaning Product", "Other"
 7. **Emoji**: Assign a single relevant emoji (e.g., 🍗, 🥛, 🍎).
 8. **Duplicate Prevention**: Combine entries with the EXACT same name and price by adding quantities for e.g if there are multiple entries for oil standardize the name to vegetable oil and add the quantity.
 9. **Data Validation**: Ensure all extracted data is valid and complete.
