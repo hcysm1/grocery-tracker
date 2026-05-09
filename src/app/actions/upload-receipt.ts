@@ -29,18 +29,59 @@ export async function uploadReceiptAction(formData: FormData) {
     }, { apiVersion: 'v1beta' });
 
     const prompt = `
-      Analyze this grocery receipt.
-      Extract store name, total, and the DATE on the receipt in this format = (YYYY-MM-DD).
-      
-      Extract all items following these rules:
-      1. Unit Price: Capture price AFTER '@'.
-      2. Variations: List same name with DIFFERENT prices as separate entries.
-      3. Grouping: Sum quantities for EXACT same name AND price.
-      4. Exclude: Discounts, Savings, Tax, Subtotal.
-      5. Name Standardization: Simplify and standardize item names (e.g., change "CHICK BONELESS" to "Boneless Chicken", CHIK FILLET to "Chicken Fillet", "P/APPLE CHUNKS" to "Pineapple Chunks", "RED ONION - KG" to "Onion", keep different types of products in separate rows like yogurt and greek yogurt are different). Remove weights, brand names, and codes from the name.
-      
-      Return JSON ONLY:
-      {"store": "string", "date": "string", "total": number, "items": [{"name": "string", "price": number, "quantity": number}]}
+Analyze this grocery receipt carefully.
+Extract store name, total, and the DATE on the receipt in this format = (YYYY-MM-DD).
+
+Extract all items following these rules:
+
+1. **Unit Price**: Capture the price AFTER '@' if present; otherwise use the listed item price.
+
+2. **Name Identification**: Read each item name slowly and carefully. Do NOT confuse similar-sounding products.
+   - Standardize names: e.g., "CHICK BONELESS" → "Boneless Chicken", "CHIK FILLET" → "Chicken Fillet", "P/APPLE CHUNKS" → "Pineapple Chunks", "RED ONION - KG" → "Red Onion".
+   - Remove weights, brand codes from the name but EXTRACT brand into the brand field.
+   - Keep distinctly different products in SEPARATE rows (e.g., "Yogurt" and "Greek Yogurt" are different items).
+
+3. **Quantity**: Express as a number only (e.g., 1, 2, 0.5). Do not include units here.
+
+4. **Unit**: The unit of measurement for the quantity. Examples:
+   - "kg", "g", "liter", "ml"
+   - "pc", "pcs", "packet", "bottle", "box", "can", "bunch"
+   - If no unit is shown, default to "pc".
+
+5. **Brand**: Extract the brand name if visible on the receipt (e.g., "Nestle", "Heinz", "Farm Fresh").
+   - If no brand is identifiable, return null.
+
+6. **Category**: Assign a logical grocery category based on the product name. Use one of:
+   - "Fruits", "Vegetables", "Meat & Poultry", "Seafood", "Dairy & Eggs",
+     "Bakery", "Beverages", "Snacks", "Frozen Foods", "Pantry & Condiments",
+     "Household", "Personal Care", "Baby Products", "Other"
+
+7. **Emoji**: Assign a single relevant emoji based on the product name.
+   - Examples: Chicken → 🍗, Milk → 🥛, Apple → 🍎, Rice → 🍚, Eggs → 🥚, Water → 💧
+
+8. **Duplicate Prevention**: Before adding an entry, check if the EXACT same name AND price already exists.
+   - If yes → combine by ADDING quantities.
+   - If same name but DIFFERENT price → list as a SEPARATE entry.
+
+9. **Exclude**: Discounts, Savings, Tax, Subtotal, and any non-product line items.
+
+Return JSON ONLY — no markdown, no explanation:
+{
+  "store": "string",
+  "date": "string",
+  "total": number,
+  "items": [
+    {
+      "name": "string",
+      "brand": "string | null",
+      "category": "string",
+      "emoji": "string",
+      "price": number,
+      "quantity": number,
+      "unit": "string"
+    }
+  ]
+}
     `;
 
     const imagePart = {
