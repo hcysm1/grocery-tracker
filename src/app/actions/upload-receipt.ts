@@ -25,7 +25,7 @@ export async function uploadReceiptAction(formData: FormData) {
     
     // Model name set to 1.5-flash for 2026 stability
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash", 
+      model: "gemini-3-flash-preview", 
     }, { apiVersion: 'v1beta' });
 
     const prompt = `
