@@ -1,54 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { StatsCard } from './StatsCard';
-import { Plus, Minus, Edit2, Trash2, Package, Search, ChevronRight, ChevronLeft, AlertTriangle, DollarSign, TrendingUp} from "lucide-react";
+import { Plus, Search} from "lucide-react";
 
 export default function InventoryDashboard({ receipts, userCurrency }: any) {
   // 1. Setup your state
-  const [inventory, setInventory] = useState<any[]>([]); 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentYear, setCurrentYear] = useState(2026);
-
-  // 2. Logic to process receipts into inventory 
-  // Tip: Use useMemo or useEffect to group receipt_items by name
-  const processedData = useMemo(() => {
-    // Your logic here: 
-    // Loop through receipts -> receipt_items -> sum quantities by name
-    return []; 
-  }, [receipts]);
-
-
-
-  // Action Handlers (To be written by you)
-  const handleAdd = () => { /* Logic to push a new object to inventory */ };
-  const updateQty = (id: string, delta: number) => { /* Map and update qty */ };
-  const handleDelete = (id: string) => { /* Filter out the id */ };
-
-  // Format the date for the UI (e.g., "December 2023")
-  const displayDate = currentDate.toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-  });
-
-  // handle previous buttons
-  const handlePreviousMonth = () => {
-      setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() - 1);
-      return newDate;
-    });
-  };
   
-  //handle next buttons
-  const handleNextMonth = () => {
-      setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      newDate.setMonth(newDate.getMonth() + 1);
-      return newDate;
-    });
-  };
+  const [searchTerm, setSearchTerm] = useState("");
+
+
 
   return (
     <div className="space-y-6">
