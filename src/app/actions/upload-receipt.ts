@@ -34,8 +34,8 @@ Extract store name, total, and the DATE on the receipt in this format = (YYYY-MM
 
 Extract all items following these rules:
 
-1. **Unit Price**: Capture the price AFTER '@' if present; otherwise use the listed item price.
-2. **Name Identification**: Standardize names (e.g., "RED ONION - KG" → "Red Onion"). Remove weights/brand codes from the name.
+1. **Unit Price**: Capture the unit priceif present; otherwise use the listed item price.
+2. **Name Identification**: Standardize and translate the names in english(e.g., "RED ONION - KG" → "Red Onion"). Remove weights/brand codes from the name.
 3. **Quantity**: Express as a number only.
 4. **Unit**: Extract unit (kg, g, liter, ml, pc, packet, bottle). Default to "pc" if unknown.
 5. **Brand**: Extract the brand name (e.g., "Nestle") or return null.
@@ -44,7 +44,7 @@ Extract all items following these rules:
    "Bakery", "Beverages", "Snacks", "Frozen Foods", "Pantry & Condiments",
    "Household", "Personal Care", "Cleaning Product", "Other"
 7. **Emoji**: Assign a single relevant emoji (e.g., 🍗, 🥛, 🍎).
-8. **Duplicate Prevention**: Combine entries with the EXACT same name and price by adding quantities for e.g if there are multiple entries for oil standardize the name to vegetable oil and add the quantity.
+8. **Duplicate Prevention**: Combine entries with the EXACT same name and price by adding quantities.
 9. **Data Validation**: Ensure all extracted data is valid and complete.
 10. **if there are any discounts please apply to the total price if not applied. Always double check**
 
