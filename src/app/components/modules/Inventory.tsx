@@ -64,27 +64,8 @@ export default function InventoryDashboard({ receipts, userCurrency }: any) {
          </button>
       </div>
 
-      {/* Month Selector */}
-      <div className="bg-white rounded-xl p-4 mb-8 shadow-sm border border-slate-100 flex items-center justify-between">
-        <button className="p-2 hover:bg-gray-100 rounded-lg border border-slate-200" onClick={handlePreviousMonth}>
-          <ChevronLeft size={20} />
-        </button>
-        <div className="text-center">
-          <h2 className="text-lg font-semibold">{displayDate}</h2>
-          <p className="text-sm text-gray-600 mt-1">Monthly Inventory Overview</p>
-        </div>
-        <button className="p-2 hover:bg-gray-100 rounded-lg border border-slate-200" onClick={handleNextMonth}>
-          <ChevronRight size={20} />
-        </button>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatsCard title="Total Items" value="9" sub="Active inventory items" icon={<Package className="text-blue-500" />} />
-        <StatsCard title="Low Stock Alerts" value="2" sub="Items below minimum stock" icon={<AlertTriangle className="text-orange-500" />} valueColor="text-red-500" />
-        <StatsCard title="Total Value" value="$9411.54" sub="Current inventory value" icon={<DollarSign className="text-green-500" />} />
-        <StatsCard title="Stock Health" value="78%" sub="Items above minimum stock" icon={<TrendingUp className="text-purple-500" />} />
-      </div>
+   
+     
 
       {/* Search Bar */}
       <div className="relative">

@@ -14,7 +14,7 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
   const [status, setStatus] = useState("");
   const [statusType, setStatusType] = useState<"success" | "error" | "info">("info");
   const [preview, setPreview] = useState<string | null>(null);
-  const [recentReceipts, setRecentReceipts] = useState<any[]>([]);
+  
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
