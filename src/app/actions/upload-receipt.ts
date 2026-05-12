@@ -29,26 +29,26 @@ export async function uploadReceiptAction(formData: FormData) {
     }, { apiVersion: 'v1beta' });
 
     const prompt = `
-Analyze this grocery receipt carefully.
-Extract store name, total, and the DATE on the receipt in this format = (YYYY-MM-DD).
+Analyze the following grocery receipt image carefully and extract the data into the specified JSON format.
 
 Extract all items following these rules:
 
-1. **Unit Price**: Capture the unit priceif present; otherwise use the listed item price.
-2. **Name Identification**: Standardize and translate the names in english(e.g., "RED ONION - KG" → "Red Onion"). Remove weights/brand codes from the name.
-3. **Quantity**: Express as a number only.
-4. **Unit**: Extract unit (kg, g, liter, ml, pc, packet, bottle). Default to "pc" if unknown.
-5. **Brand**: Extract the brand name (e.g., "Nestle") or return null.
-6. **Category**: You MUST use EXACTLY one of these categories:
-   "Fruits", "Vegetables", "Meat & Poultry", "Dairy & Eggs",
-   "Bakery", "Beverages", "Snacks", "Frozen Foods", "Pantry & Condiments",
-   "Household", "Personal Care", "Cleaning Product", "Other"
-7. **Emoji**: Assign a single relevant emoji (e.g., 🍗, 🥛, 🍎).
-8. **Duplicate Prevention**: Combine entries with the EXACT same name and price by adding quantities.
-9. **Data Validation**: Ensure all extracted data is valid and complete.
-10. **if there are any discounts please apply to the total price if not applied. Always double check**
+1. Store & Date: Extract the store name and the date. Format the date as YYYY-MM-DD.
 
-Return JSON ONLY:
+2. Name Identification: Translate names to English (e.g., "Limau Nipis" → "Lime", "Lada Hitam" → "Black Pepper"). Remove weights, brand codes, or SKU numbers from the name.
+
+Discount Handling: If a "Discount" line follows an item, subtract that discount from the item's price to provide the final net price per item.
+
+4. Quantity & Unit: Express quantity as a number. Extract units (kg, g, pc, packet, etc.). Default to "pc" if none is specified.
+
+5. Duplicate Prevention: Combine entries with the exact same name and price by summing their quantities.
+
+Categories: You MUST use exactly one of these: "Fruits", "Vegetables", "Meat & Poultry", "Dairy & Eggs", "Bakery", "Beverages", "Snacks", "Frozen Foods", "Pantry & Condiments", "Household", "Personal Care", "Cleaning Product", "Other".
+
+7. Data Integrity: Ensure the "total" matches the final amount paid on the receipt after all discounts and rounding.
+
+return the data in this JSON format:
+
 {
   "store": "string",
   "date": "string",
