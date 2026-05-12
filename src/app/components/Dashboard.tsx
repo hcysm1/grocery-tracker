@@ -3,11 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import ReceiptScanner from "./modules/ReceiptScanner";
 import MonthlyDashboard from "./modules/MonthlyDashboard";
+import SpendingAnalysis from "./modules/SpendingAnalysis";
 import Inventory from "./modules/Inventory";
 import { Sheet, Home, Settings, Loader2, Package } from "lucide-react";
 import { getReceiptsAction } from "@/app/actions/get-receipts";
 
-type ActiveTab = "dashboard" | "receipts" | "inventory";
+type ActiveTab = "dashboard" | "receipts" | "inventory" | "spending";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
@@ -44,6 +45,7 @@ export default function Dashboard() {
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "receipts", label: "Scan Receipts", icon: Sheet },
     { id: "inventory", label: "Inventory", icon: Package },
+    { id: "spending", label: "Spending Analysis", icon: Package },
   ];
 
   return (
@@ -125,6 +127,9 @@ export default function Dashboard() {
                 )}
                 {activeTab === "inventory" && (
                   <Inventory receipts={receipts} userCurrency={userProfile.currency} />
+                )}
+                 {activeTab === "spending" && (
+                  <SpendingAnalysis receipts={receipts} userCurrency={userProfile.currency}/>
                 )}
               </div>
             ) : (
