@@ -42,7 +42,7 @@ export default function Dashboard() {
   };
 
   const navigationItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "dashboard", label: "Monthly Overview", icon: Home },
     { id: "receipts", label: "Scan Receipts", icon: Sheet },
     { id: "inventory", label: "Inventory", icon: Package },
     { id: "spending", label: "Spending Analysis", icon: Package },
