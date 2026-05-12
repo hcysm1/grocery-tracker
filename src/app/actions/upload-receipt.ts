@@ -33,19 +33,21 @@ Analyze the following grocery receipt image carefully and extract the data into 
 
 Extract all items following these rules:
 
-1. Store & Date: Extract the store name and the date. Format the date as YYYY-MM-DD.
+1. Layout Logic: This is a multi-column receipt. Read from top-to-bottom, left-to-right across the columns.
 
-2. Name Identification: Translate names to English (e.g., "Limau Nipis" → "Lime", "Lada Hitam" → "Black Pepper"). Remove weights, brand codes, or SKU numbers from the name.
+2. Store & Date: Extract the store name and the date. Format the date as YYYY-MM-DD.
 
-Discount Handling: If a "Discount" line follows an item, subtract that discount from the item's price to provide the final net price per item.
+3. Name Identification: Translate names to English (e.g., "Limau Nipis" → "Lime", "Lada Hitam" → "Black Pepper"). Remove weights, brand codes, or SKU numbers from the name.
 
-4. Quantity & Unit: Express quantity as a number. Extract units (kg, g, pc, packet, etc.). Default to "pc" if none is specified.
+4. Discount Handling: If a "Discount" line follows an item, subtract that discount from the item's price to provide the final net price per item.
 
-5. Duplicate Prevention: Combine entries with the exact same name and price by summing their quantities.
+5. Quantity & Unit: Express quantity as a number. Extract units (kg, g, pc, packet, etc.). Default to "pc" if none is specified.
+
+6. Duplicate Prevention: Combine entries with the exact same name and price by summing their quantities.
 
 Categories: You MUST use exactly one of these: "Fruits", "Vegetables", "Meat & Poultry", "Dairy & Eggs", "Bakery", "Beverages", "Snacks", "Frozen Foods", "Pantry & Condiments", "Household", "Personal Care", "Cleaning Product", "Other".
 
-7. Data Integrity: Ensure the "total" matches the final amount paid on the receipt after all discounts and rounding.
+8. Data Integrity: Ensure the "total" matches the final amount paid on the receipt after all discounts and rounding.
 
 return the data in this JSON format:
 
