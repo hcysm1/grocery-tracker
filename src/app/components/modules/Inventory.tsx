@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState} from "react";
 import { Plus, Search} from "lucide-react";
 
 export default function InventoryDashboard({ receipts, userCurrency }: any) {
