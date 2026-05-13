@@ -5,7 +5,7 @@ import ReceiptScanner from "./modules/ReceiptScanner";
 import MonthlyDashboard from "./modules/MonthlyDashboard";
 import SpendingAnalysis from "./modules/SpendingAnalysis";
 import Inventory from "./modules/Inventory";
-import { Sheet, Home, Settings, Loader2, Package, PieChart } from "lucide-react";
+import { Sheet, Home, Settings, Loader2, Package, PieChart, CreditCard } from "lucide-react";
 import { getReceiptsAction } from "@/app/actions/get-receipts";
 
 type ActiveTab = "dashboard" | "receipts" | "inventory" | "spending";
@@ -41,52 +41,56 @@ export default function Dashboard() {
   };
 
   const navigationItems = [
-    { id: "dashboard", label: "Monthly Overview", icon: Home },
-    { id: "receipts", label: "Scan Receipts", icon: Sheet },
-    { id: "inventory", label: "Inventory", icon: Package },
-    { id: "spending", label: "Spending Analysis", icon: PieChart },
+    { id: "dashboard", label: "Overview", icon: Home },
+    { id: "receipts", label: "Scan Receipt", icon: Sheet },
+    { id: "inventory", label: "Pantry", icon: Package },
+    { id: "spending", label: "Analysis", icon: PieChart },
   ];
 
   return (
-    // Updated background to a very slight green-tinted slate
-    <div className="min-h-screen bg-[#f8faf9]">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-emerald-100 shadow-sm">
+    // Grab uses a very clean, slightly off-white background
+    <div className="min-h-screen bg-[#F9F9F9] text-[#252525]">
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Logo: Shifted from Blue to Emerald 500 */}
-            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
-              <Sheet className="text-white" size={22} />
+            {/* Grab's signature logo color #00B14F */}
+            <div className="w-10 h-10 bg-[#00B14F] rounded-full flex items-center justify-center shadow-md">
+              <Sheet className="text-white" size={20} />
             </div>
             <div>
-              <h1 className="text-xl font-black text-slate-900 leading-tight tracking-tight">
-                Grocery<span className="text-emerald-600">Track</span>
+              <h1 className="text-xl font-bold text-[#252525] tracking-tight">
+                Grocery<span className="text-[#00B14F]">Track</span>
               </h1>
-              <p className="text-[10px] text-emerald-600/60 uppercase tracking-widest font-bold">Authenticated Session</p>
+              <div className="flex items-center gap-1">
+                <span className="w-2 h-2 bg-[#00B14F] rounded-full animate-pulse"></span>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Live Session</p>
+              </div>
             </div>
           </div>
           
           {loading && (
-            <div className="flex items-center gap-2 text-emerald-600 text-sm font-semibold animate-pulse">
-              <Loader2 className="animate-spin" size={16} /> Syncing Pantry...
+            <div className="flex items-center gap-2 text-[#00B14F] text-sm font-bold">
+              <Loader2 className="animate-spin" size={16} /> Updating...
             </div>
           )}
 
           <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold text-slate-900">{userProfile.name}</p>
-              <p className="text-xs text-slate-500">{userProfile.email}</p>
-            </div>
-            <button className="p-2 hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 rounded-full transition-colors">
+            <button className="p-2 hover:bg-gray-100 text-gray-600 rounded-full transition-colors">
               <Settings size={20} />
             </button>
+            <div className="w-8 h-8 bg-gray-200 rounded-full border-2 border-white shadow-sm overflow-hidden">
+               <div className="w-full h-full bg-[#00B14F]/10 flex items-center justify-center text-[#00B14F] font-bold text-xs">
+                 {userProfile.name[0]}
+               </div>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="flex">
-        {/* SIDEBAR */}
-        <aside className="hidden md:flex w-64 bg-white border-r border-emerald-50 flex-col sticky top-16 h-[calc(100vh-64px)]">
-          <nav className="flex-1 px-4 py-8 space-y-2">
+        {/* SIDEBAR - Styled like Grab's side menus */}
+        <aside className="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col sticky top-16 h-[calc(100vh-64px)]">
+          <nav className="flex-1 px-4 py-8 space-y-1">
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -94,26 +98,29 @@ export default function Dashboard() {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as ActiveTab)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 ${
                     isActive
-                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-200 ring-1 ring-emerald-500"
-                      : "text-slate-500 hover:bg-emerald-50 hover:text-emerald-700"
+                      ? "bg-[#00B14F] text-white shadow-lg shadow-green-100 font-bold"
+                      : "text-gray-500 hover:bg-gray-50 hover:text-[#252525] font-semibold"
                   }`}
                 >
-                  <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                  <span className="font-bold">{item.label}</span>
+                  <Icon size={22} />
+                  <span className="text-[15px]">{item.label}</span>
                 </button>
               );
             })}
           </nav>
 
-          {/* Spend Summary Widget */}
-          <div className="p-4 m-4 rounded-2xl border border-emerald-100 bg-emerald-50/30">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-[10px] font-bold text-emerald-700/60 uppercase tracking-wider">Lifetime Spend</span>
+          {/* Grab Wallet Style Summary */}
+          <div className="p-4 m-4 rounded-3xl bg-gradient-to-br from-white to-gray-50 border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="p-1.5 bg-[#00B14F]/10 rounded-lg">
+                <CreditCard size={14} className="text-[#00B14F]" />
+              </div>
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Total Expenses</span>
             </div>
-            <p className="text-2xl font-black text-emerald-900">
-              <span className="text-sm font-medium mr-1 opacity-60">{userProfile.currency}</span>
+            <p className="text-2xl font-black text-[#252525]">
+              <span className="text-sm font-bold mr-0.5 text-gray-400">{userProfile.currency}</span>
               {receipts.reduce((sum, r) => sum + (r.total_amount || 0), 0).toFixed(2)}
             </p>
           </div>
@@ -123,7 +130,7 @@ export default function Dashboard() {
         <main className="flex-1">
           <div className="max-w-5xl mx-auto p-6 lg:p-10">
             {!loading || receipts.length > 0 ? (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 {activeTab === "dashboard" && (
                   <MonthlyDashboard receipts={receipts} userCurrency={userProfile.currency} />
                 )}
@@ -139,11 +146,8 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-[60vh]">
-                <div className="relative">
-                    <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
-                    <div className="absolute inset-0 bg-emerald-200 blur-2xl opacity-20 animate-pulse"></div>
-                </div>
-                <p className="text-emerald-800/60 font-bold tracking-tight">Stocking your shelves...</p>
+                <div className="w-16 h-16 border-4 border-[#00B14F]/20 border-t-[#00B14F] rounded-full animate-spin mb-6"></div>
+                <p className="text-gray-400 font-semibold text-lg">Getting things ready...</p>
               </div>
             )}
           </div>
