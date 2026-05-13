@@ -614,7 +614,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
         <>
           {/* ── KPI row ─────────────────────────────────────────────────────── */}
           <SectionLabel>Key Metrics</SectionLabel>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-2">
 
             <KpiCard label="Receipts"     value={totalReceipts}                               sub="Scanned"  icon={<ShoppingCart size={16}/>}  accent="#F59E0B" />
             <KpiCard label="Avg. Trip"    value={`${userCurrency} ${avgTrip.toFixed(2)}`}    sub="Per visit" icon={<TrendingUp size={16}/>}   accent="#10B981" />
