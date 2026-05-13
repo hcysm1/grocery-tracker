@@ -93,7 +93,7 @@ export default function Dashboard() {
                   onClick={() => setActiveTab(item.id as ActiveTab)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                     isActive
-                      ? "bg-green-600 text-white shadow-lg shadow-green-200"
+                      ? "bg-green-800 text-white shadow-lg shadow-green-600"
                       : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
