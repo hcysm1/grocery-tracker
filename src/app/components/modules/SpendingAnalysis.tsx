@@ -615,12 +615,10 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
           {/* ── KPI row ─────────────────────────────────────────────────────── */}
           <SectionLabel>Key Metrics</SectionLabel>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-2">
-            <KpiCard label="Total Spent"  value={`${userCurrency} ${totalSpent.toFixed(2)}`} sub="All time" icon={<Wallet size={16} />}     accent="#2563EB" />
+
             <KpiCard label="Receipts"     value={totalReceipts}                               sub="Scanned"  icon={<ShoppingCart size={16}/>}  accent="#F59E0B" />
             <KpiCard label="Avg. Trip"    value={`${userCurrency} ${avgTrip.toFixed(2)}`}    sub="Per visit" icon={<TrendingUp size={16}/>}   accent="#10B981" />
             <KpiCard label="Stores"       value={storeMap.size}                               sub="Unique"   icon={<Store size={16}/>}         accent="#8B5CF6" />
-            <KpiCard label="Categories"   value={categoryMap.size}                            sub="Product types" icon={<Layers size={16}/>}  accent="#EF4444" />
-            <KpiCard label="Items"        value={itemMap.size}                                sub="Unique products" icon={<Package size={16}/>} accent="#06B6D4" />
           </div>
 
           {/* ── Monthly trend ────────────────────────────────────────────────── */}
