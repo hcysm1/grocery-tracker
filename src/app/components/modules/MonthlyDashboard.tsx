@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { StatsCard } from './StatsCard';
 import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import ReactECharts from "echarts-for-react";
 import { TrendingUp, Calendar, Wallet, ShoppingCart, ChevronLeft, ChevronRight, ReceiptText, Tag } from "lucide-react";
 
 interface MonthlyDashboardProps {

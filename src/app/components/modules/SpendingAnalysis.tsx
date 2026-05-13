@@ -1,18 +1,5 @@
 "use client";
 
-/**
- * SpendingAnalysis.tsx
- *
- * Full receipt analysis dashboard using ECharts.
- *
- * Install deps first:
- *   npm install echarts echarts-for-react
- *
- * Usage:
- *   import SpendingAnalysis from "@/components/SpendingAnalysis";
- *   <SpendingAnalysis receipts={receipts} userCurrency="RM" />
- */
-
 import { useMemo, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import {

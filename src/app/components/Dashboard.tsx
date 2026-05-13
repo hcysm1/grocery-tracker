@@ -11,7 +11,7 @@ import { getReceiptsAction } from "@/app/actions/get-receipts";
 type ActiveTab = "dashboard" | "receipts" | "inventory" | "spending";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>("dashboard");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("receipts");
   const [receipts, setReceipts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userProfile] = useState({
