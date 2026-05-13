@@ -48,12 +48,12 @@ export default function Dashboard() {
   ];
 
   return (
-    // Grab uses a very clean, slightly off-white background
+  
     <div className="min-h-screen bg-[#F9F9F9] text-[#252525]">
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Grab's signature logo color #00B14F */}
+          
             <div className="w-10 h-10 bg-[#00B14F] rounded-full flex items-center justify-center shadow-md">
               <Sheet className="text-white" size={20} />
             </div>
@@ -61,10 +61,7 @@ export default function Dashboard() {
               <h1 className="text-xl font-bold text-[#252525] tracking-tight">
                 Grocery<span className="text-[#00B14F]">Track</span>
               </h1>
-              <div className="flex items-center gap-1">
-                <span className="w-2 h-2 bg-[#00B14F] rounded-full animate-pulse"></span>
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Live Session</p>
-              </div>
+              
             </div>
           </div>
           
@@ -88,7 +85,7 @@ export default function Dashboard() {
       </header>
 
       <div className="flex">
-        {/* SIDEBAR - Styled like Grab's side menus */}
+      
         <aside className="hidden md:flex w-64 bg-white border-r border-gray-100 flex-col sticky top-16 h-[calc(100vh-64px)]">
           <nav className="flex-1 px-4 py-8 space-y-1">
             {navigationItems.map((item) => {
@@ -111,7 +108,7 @@ export default function Dashboard() {
             })}
           </nav>
 
-          {/* Grab Wallet Style Summary */}
+      
           <div className="p-4 m-4 rounded-3xl bg-gradient-to-br from-white to-gray-50 border border-gray-100 shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <div className="p-1.5 bg-[#00B14F]/10 rounded-lg">
