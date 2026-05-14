@@ -9,7 +9,7 @@ import { Sheet, Home, Settings, Loader2, Package, PieChart, CreditCard } from "l
 import { getReceiptsAction } from "@/app/actions/get-receipts";
 import { fetchInventoryAction } from "../actions/inventory";
 
-const { data: inventory } = await fetchInventoryAction();
+
 
 
 type ActiveTab = "dashboard" | "receipts" | "inventory" | "spending";
@@ -17,6 +17,7 @@ type ActiveTab = "dashboard" | "receipts" | "inventory" | "spending";
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("receipts");
   const [receipts, setReceipts] = useState<any[]>([]);
+  const [inventory, setInventory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [userProfile] = useState({
     name: "User",
@@ -24,11 +25,17 @@ export default function Dashboard() {
     currency: "MYR"
   });
 
-  const refreshData = useCallback(async () => {
+const refreshData = useCallback(async () => {
     try {
       setLoading(true);
       const receiptsData = await getReceiptsAction();
+      const { data: inventoryData } = await fetchInventoryAction(); // Rename to avoid confusion
+      
       setReceipts(receiptsData || []);
+      
+      // 2. Set the state here so it's accessible globally in the component
+      setInventory(inventoryData || []); 
+      
     } catch (error) {
       console.error("Dashboard Sync Error:", error);
     } finally {
@@ -141,8 +148,7 @@ export default function Dashboard() {
                   <ReceiptScanner onReceiptAdded={handleReceiptAdded} />
                 )}
                 {activeTab === "inventory" && (
-                 
-                 <InventoryDashboard receipts={receipts} userCurrency="RM" initialInventory={inventory ?? []} />
+                  <InventoryDashboard receipts={receipts} userCurrency="RM" initialInventory={inventory ?? []} />
                 )}
                 {activeTab === "spending" && (
                   <SpendingAnalysis receipts={receipts} userCurrency={userProfile.currency}/>
