@@ -1,65 +1,737 @@
 "use client";
 
-import { useState} from "react";
-import { Plus, Search} from "lucide-react";
+/**
+ * Inventory.tsx
+ *
+ * Usage — fetch inventory server-side and pass it in:
+ *
+ *   // page.tsx (server component)
+ *   const { data: inventory } = await fetchInventoryAction();
+ *   <InventoryDashboard receipts={receipts} userCurrency="RM" initialInventory={inventory ?? []} />
+ */
 
-export default function InventoryDashboard({ receipts, userCurrency }: any) {
-  // 1. Setup your state
-  
-  const [searchTerm, setSearchTerm] = useState("");
+import { useState, useMemo, useRef, useEffect } from "react";
+import {
+  Plus, Search, Pencil, Trash2, Check, X,
+  AlertTriangle, Package, DollarSign, ShieldAlert,
+  ChevronDown, Loader2,
+} from "lucide-react";
+import {
+  addInventoryItemAction,
+  updateInventoryItemAction,
+  deleteInventoryItemAction,
+  type InventoryItem,
+  type NewInventoryItem,
+} from "@/app/actions/inventory";
 
+// ─── Props ────────────────────────────────────────────────────────────────────
 
+interface InventoryDashboardProps {
+  receipts:         any[];
+  userCurrency:     string;
+  initialInventory: InventoryItem[];   // pass from server via fetchInventoryAction()
+}
+
+// ─── Categories (must match DB CHECK constraint) ──────────────────────────────
+
+const CATEGORIES = [
+  "Fruits", "Vegetables", "Meat & Poultry", "Seafood",
+  "Dairy & Eggs", "Bakery", "Beverages", "Snacks",
+  "Frozen Foods", "Pantry & Condiments", "Household",
+  "Personal Care", "Baby Products", "Cleaning Product", "Other",
+];
+
+// ─── Tooltip base for ECharts (if needed later) ───────────────────────────────
+
+// ─── KPI Card ─────────────────────────────────────────────────────────────────
+
+function KpiCard({ label, value, sub, icon, accent }: {
+  label: string; value: string | number; sub: string;
+  icon: React.ReactNode; accent: string;
+}) {
+  return (
+    <div
+      className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow"
+      style={{ borderTop: `3px solid ${accent}` }}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">{label}</span>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${accent}18` }}>
+          <span style={{ color: accent }}>{icon}</span>
+        </div>
+      </div>
+      <div>
+        <div className="text-2xl font-bold text-slate-800 leading-tight">{value}</div>
+        <div className="text-xs text-slate-400 mt-0.5">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Add Item Modal ───────────────────────────────────────────────────────────
+
+interface ModalProps {
+  open:      boolean;
+  onClose:   () => void;
+  onSave:    (item: NewInventoryItem) => Promise<void>;
+  initial?:  Partial<NewInventoryItem>;
+  title:     string;
+}
+
+function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
+  const [name,      setName]      = useState(initial?.name      ?? "");
+  const [emoji,     setEmoji]     = useState(initial?.emoji     ?? "📦");
+  const [category,  setCategory]  = useState(initial?.category  ?? "Other");
+  const [quantity,  setQuantity]  = useState<number>(initial?.quantity  ?? 1);
+  const [unit,      setUnit]      = useState(initial?.unit      ?? "pcs");
+  const [price,     setPrice]     = useState<number>(initial?.price     ?? 0);
+  const [threshold, setThreshold] = useState<number>(initial?.low_stock_threshold ?? 5);
+  const [saving,    setSaving]    = useState(false);
+  const [error,     setError]     = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setName(initial?.name ?? "");
+      setEmoji(initial?.emoji ?? "📦");
+      setCategory(initial?.category ?? "Other");
+      setQuantity(initial?.quantity ?? 1);
+      setUnit(initial?.unit ?? "pcs");
+      setPrice(initial?.price ?? 0);
+      setThreshold(initial?.low_stock_threshold ?? 5);
+      setError("");
+    }
+  }, [open, initial]);
+
+  if (!open) return null;
+
+  const handleSave = async () => {
+    if (!name.trim()) { setError("Item name is required."); return; }
+    setSaving(true);
+    setError("");
+    await onSave({
+      product_id:          initial?.product_id ?? null,
+      name:                name.trim(),
+      emoji,
+      category,
+      quantity,
+      unit,
+      price,
+      low_stock_threshold: threshold,
+    });
+    setSaving(false);
+    onClose();
+  };
+
+  const inputCls = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition bg-slate-50/50 placeholder:text-slate-400";
+  const labelCls = "block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1.5";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md border border-slate-100 overflow-hidden">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h2 className="font-bold text-slate-800 text-lg">{title}</h2>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
+            <X size={18} className="text-slate-500" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+
+          {error && (
+            <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <AlertTriangle size={14} /> {error}
+            </div>
+          )}
+
+          {/* Emoji + Name */}
+          <div className="flex gap-3">
+            <div className="flex-shrink-0">
+              <label className={labelCls}>Icon</label>
+              <input
+                className="w-14 h-[42px] border border-slate-200 rounded-xl text-center text-xl bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                value={emoji}
+                onChange={(e) => setEmoji(e.target.value)}
+                maxLength={2}
+              />
+            </div>
+            <div className="flex-1">
+              <label className={labelCls}>Item Name <span className="text-red-400">*</span></label>
+              <input
+                className={inputCls}
+                placeholder="e.g. Full Cream Milk"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className={labelCls}>Category</label>
+            <div className="relative">
+              <select
+                className={`${inputCls} appearance-none pr-8`}
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Quantity + Unit */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Quantity</label>
+              <input type="number" min={0} className={inputCls} value={quantity}
+                onChange={(e) => setQuantity(Number(e.target.value))} />
+            </div>
+            <div>
+              <label className={labelCls}>Unit</label>
+              <input className={inputCls} placeholder="pcs / kg / L" value={unit}
+                onChange={(e) => setUnit(e.target.value)} />
+            </div>
+          </div>
+
+          {/* Price + Threshold */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={labelCls}>Unit Price</label>
+              <input type="number" min={0} step={0.01} className={inputCls} value={price}
+                onChange={(e) => setPrice(Number(e.target.value))} />
+            </div>
+            <div>
+              <label className={labelCls}>Low Stock Alert ⚠</label>
+              <input type="number" min={0} className={inputCls} placeholder="5" value={threshold}
+                onChange={(e) => setThreshold(Number(e.target.value))} />
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+            <AlertTriangle size={11} />
+            A warning badge appears when quantity drops below your Low Stock Alert value.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+          <button onClick={onClose}
+            className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={saving || !name.trim()}
+            className="px-5 py-2 text-sm font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+            Save Item
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+export default function InventoryDashboard({
+  receipts,
+  userCurrency,
+  initialInventory,
+}: InventoryDashboardProps) {
+
+  // ── State ──────────────────────────────────────────────────────────────────
+
+  const [inventory,        setInventory]        = useState<InventoryItem[]>(initialInventory);
+  const [searchTerm,       setSearchTerm]       = useState("");
+  const [showDropdown,     setShowDropdown]     = useState(false);
+  const [modalOpen,        setModalOpen]        = useState(false);
+  const [modalInitial,     setModalInitial]     = useState<Partial<NewInventoryItem>>({});
+  const [modalTitle,       setModalTitle]       = useState("Add Item");
+  const [editingId,        setEditingId]        = useState<string | null>(null);
+  const [editName,         setEditName]         = useState("");
+  const [editQty,          setEditQty]          = useState<number>(0);
+  const [deleteConfirmId,  setDeleteConfirmId]  = useState<string | null>(null);
+  const [filterCategory,   setFilterCategory]   = useState("All");
+  const [actionError,      setActionError]      = useState("");
+
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node))
+        setShowDropdown(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // ── Product suggestions from receipts ──────────────────────────────────────
+
+  const productSuggestions = useMemo(() => {
+    const map = new Map<string, {
+      name: string; emoji: string; category: string;
+      unit: string; lastPrice: number; product_id: string | null;
+    }>();
+
+    receipts.forEach((r) => {
+      (r.receipt_items || []).forEach((it: any) => {
+        const p    = it.products;
+        const name = p?.name;
+        if (!name) return;
+        map.set(name, {
+          name,
+          emoji:      p?.emoji     ?? "📦",
+          category:   p?.category  ?? "Other",
+          unit:       it.unit      ?? "pcs",
+          lastPrice:  Number(it.unit_price) || 0,
+          product_id: p?.id        ?? null,
+        });
+      });
+    });
+
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [receipts]);
+
+  const inventoryNames = useMemo(
+    () => new Set(inventory.map((i) => i.name.toLowerCase())),
+    [inventory]
+  );
+
+  const filteredSuggestions = useMemo(() =>
+    searchTerm.trim() === ""
+      ? productSuggestions
+      : productSuggestions.filter((p) =>
+          p.name.toLowerCase().includes(searchTerm.toLowerCase())
+        ),
+    [productSuggestions, searchTerm]
+  );
+
+  // ── Category filter options ────────────────────────────────────────────────
+
+  const allCategories = useMemo(() => {
+    const cats = new Set(inventory.map((i) => i.category));
+    return ["All", ...Array.from(cats).sort()];
+  }, [inventory]);
+
+  // ── Filtered rows ──────────────────────────────────────────────────────────
+
+  const filteredInventory = useMemo(() =>
+    inventory.filter((item) => {
+      const matchSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchCat    = filterCategory === "All" || item.category === filterCategory;
+      return matchSearch && matchCat;
+    }),
+    [inventory, searchTerm, filterCategory]
+  );
+
+  // ── KPIs ──────────────────────────────────────────────────────────────────
+
+  const totalValue    = inventory.reduce((s, i) => s + i.price * i.quantity, 0);
+  const lowStockCount = inventory.filter((i) => i.quantity <= i.low_stock_threshold).length;
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  const openAddModal = (prefill: Partial<NewInventoryItem> = {}) => {
+    setModalInitial(prefill);
+    setModalTitle("Add Item");
+    setModalOpen(true);
+    setShowDropdown(false);
+    setSearchTerm("");
+    setActionError("");
+  };
+
+  // ── ADD ───────────────────────────────────────────────────────────────────
+
+  const handleSaveNew = async (item: NewInventoryItem) => {
+    const { data, error } = await addInventoryItemAction(item);
+    if (error || !data) {
+      setActionError(error ?? "Failed to add item");
+      return;
+    }
+    setInventory((prev) => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
+  };
+
+  // ── EDIT (inline: name + quantity only) ──────────────────────────────────
+
+  const startEdit = (item: InventoryItem) => {
+    setEditingId(item.id);
+    setEditName(item.name);
+    setEditQty(item.quantity);
+    setDeleteConfirmId(null);
+    setActionError("");
+  };
+
+  const cancelEdit = () => setEditingId(null);
+
+  const saveEdit = async (item: InventoryItem) => {
+    const patch = {
+      name:     editName.trim() || item.name,
+      quantity: editQty,
+    };
+    const { error } = await updateInventoryItemAction(item.id, patch);
+    if (error) { setActionError(error); return; }
+    setInventory((prev) =>
+      prev.map((i) => i.id === item.id ? { ...i, ...patch } : i)
+    );
+    setEditingId(null);
+  };
+
+  // ── DELETE ────────────────────────────────────────────────────────────────
+
+  const handleDelete = async (id: string) => {
+    const { error } = await deleteInventoryItemAction(id);
+    if (error) { setActionError(error); return; }
+    setInventory((prev) => prev.filter((i) => i.id !== id));
+    setDeleteConfirmId(null);
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
+
+      {/* Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-bold">Inventory Management</h1>
-          <p className="text-slate-500 text-sm">Track and manage your inventory</p>   
+          <h1 className="text-2xl font-bold text-slate-900">Inventory</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Track stock levels for your household items</p>
         </div>
-         <button className="bg-slate-900 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-slate-800 transition">
-          <Plus size={18} />
-          Add Item
-         </button>
+        <button
+          onClick={() => openAddModal()}
+          className="bg-slate-900 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 hover:bg-slate-700 transition text-sm font-semibold shadow-sm"
+        >
+          <Plus size={16} /> Add Item
+        </button>
       </div>
 
-   
-     
-
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-3 text-slate-400" size={18} />
-        <input 
-          className="w-full pl-10 pr-4 py-2 border rounded-xl" 
-          placeholder="Search inventory..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <KpiCard label="Total Items"  value={inventory.length}
+          sub="Unique products tracked"    icon={<Package size={16}/>}    accent="#3B82F6" />
+        <KpiCard label="Total Value"  value={`${userCurrency} ${totalValue.toFixed(2)}`}
+          sub="Estimated stock value"      icon={<DollarSign size={16}/>} accent="#10B981" />
+        <KpiCard label="Low Stock"    value={lowStockCount}
+          sub={lowStockCount === 0 ? "All stocked up!" : "Items need restocking"}
+          icon={<ShieldAlert size={16}/>}
+          accent={lowStockCount > 0 ? "#EF4444" : "#10B981"} />
       </div>
 
-      {/* Inventory Table/List */}
-      <div className="bg-white border rounded-xl overflow-hidden">
+      {/* Low stock banner */}
+      {lowStockCount > 0 && (
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+          <AlertTriangle size={16} className="flex-shrink-0 text-red-500" />
+          <span>
+            <b>{lowStockCount} item{lowStockCount > 1 ? "s are" : " is"} running low</b> — consider restocking soon.
+          </span>
+        </div>
+      )}
+
+      {/* Action error banner */}
+      {actionError && (
+        <div className="flex items-center justify-between gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={16} className="flex-shrink-0" />
+            <span>{actionError}</span>
+          </div>
+          <button onClick={() => setActionError("")}><X size={16}/></button>
+        </div>
+      )}
+
+      {/* Search + Filter */}
+      <div className="flex flex-col sm:flex-row gap-3">
+
+        {/* Autocomplete search */}
+        <div className="relative flex-1" ref={searchRef}>
+          <Search className="absolute left-3 top-2.5 text-slate-400 z-10" size={18} />
+          <input
+            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition"
+            placeholder="Search inventory or add from receipts…"
+            value={searchTerm}
+            autoComplete="off"
+            onChange={(e) => { setSearchTerm(e.target.value); setShowDropdown(true); }}
+            onFocus={() => setShowDropdown(true)}
+          />
+
+          {/* Dropdown */}
+          {showDropdown && (
+            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-40 overflow-hidden max-h-72 overflow-y-auto">
+
+              {filteredSuggestions.length === 0 ? (
+                <div className="px-4 py-3">
+                  <p className="text-sm text-slate-500 mb-2">
+                    No matches for <b>"{searchTerm}"</b> in your receipts.
+                  </p>
+                  <button
+                    onClick={() => openAddModal({ name: searchTerm })}
+                    className="w-full flex items-center gap-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition"
+                  >
+                    <Plus size={14} /> Create "{searchTerm}" as new item
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="px-4 pt-3 pb-1">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      From your receipts
+                    </p>
+                  </div>
+
+                  {filteredSuggestions.map((p) => {
+                    const inInventory = inventoryNames.has(p.name.toLowerCase());
+                    return (
+                      <button
+                        key={p.name}
+                        disabled={inInventory}
+                        onClick={() => openAddModal({
+                          product_id: p.product_id,
+                          name:       p.name,
+                          emoji:      p.emoji,
+                          category:   p.category,
+                          unit:       p.unit,
+                          price:      p.lastPrice,
+                        })}
+                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 transition disabled:opacity-40 disabled:cursor-default text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg">{p.emoji}</span>
+                          <div>
+                            <div className="text-sm font-medium text-slate-700">{p.name}</div>
+                            <div className="text-[11px] text-slate-400">{p.category}</div>
+                          </div>
+                        </div>
+                        {inInventory ? (
+                          <span className="text-[10px] font-bold bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full">
+                            In inventory
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full">
+                            + Add
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+
+                  {searchTerm.trim() && (
+                    <div className="border-t border-slate-100 px-4 py-2.5">
+                      <button
+                        onClick={() => openAddModal({ name: searchTerm })}
+                        className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 w-full px-2 py-1.5 rounded-lg transition"
+                      >
+                        <Plus size={13} /> Create "{searchTerm}" as new item
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Category filter */}
+        <div className="relative">
+          <select
+            className="appearance-none border border-slate-200 rounded-xl pl-3 pr-8 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition text-slate-700"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            {allCategories.map((c) => <option key={c}>{c}</option>)}
+          </select>
+          <ChevronDown size={14} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <table className="w-full">
-          <thead className="bg-slate-50 border-b">
+          <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Item</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Stock</th>
-              <th className="px-6 py-3 text-right text-sm font-semibold">Actions</th>
+              {["Item", "Category", "Stock", "Unit Price", "Value", "Actions"].map((h, i) => (
+                <th key={h}
+                  className={`px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 ${i === 5 ? "text-right" : "text-left"}`}>
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y">
-            {/* Map through your inventory state here */}
-            <tr className="hover:bg-slate-50">
-               {/* Example Row Cell:
-                  <td className="px-6 py-4">Item Name</td>
-                  <td className="px-6 py-4 flex gap-2">+/- buttons</td>
-                  <td className="px-6 py-4 text-right">Edit/Delete buttons</td>
-               */}
-            </tr>
+          <tbody className="divide-y divide-slate-100">
+
+            {filteredInventory.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-5 py-16 text-center">
+                  <div className="flex flex-col items-center gap-3 text-slate-400">
+                    <Package size={36} className="text-slate-300" />
+                    <div>
+                      <p className="text-sm font-medium text-slate-600">No items yet</p>
+                      <p className="text-xs mt-0.5">
+                        Search above to add from your receipts, or{" "}
+                        <button onClick={() => openAddModal()} className="text-blue-500 underline">
+                          add manually
+                        </button>
+                      </p>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredInventory.map((item) => {
+                const isLow      = item.quantity <= item.low_stock_threshold;
+                const isEditing  = editingId === item.id;
+                const isDeleting = deleteConfirmId === item.id;
+
+                return (
+                  <tr key={item.id}
+                    className={`hover:bg-slate-50/80 transition ${isLow ? "bg-red-50/40" : ""}`}>
+
+                    {/* Item */}
+                    <td className="px-5 py-3.5">
+                      {isEditing ? (
+                        <input autoFocus
+                          className="border border-blue-300 rounded-lg px-2.5 py-1.5 text-sm w-40 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-lg flex-shrink-0">
+                            {item.emoji}
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-slate-800">{item.name}</div>
+                            {isLow && (
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <AlertTriangle size={10} className="text-red-500" />
+                                <span className="text-[10px] font-semibold text-red-500">Low stock</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Category */}
+                    <td className="px-5 py-3.5">
+                      <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                        {item.category}
+                      </span>
+                    </td>
+
+                    {/* Stock */}
+                    <td className="px-5 py-3.5">
+                      {isEditing ? (
+                        <input type="number" min={0}
+                          className="border border-blue-300 rounded-lg px-2.5 py-1.5 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                          value={editQty}
+                          onChange={(e) => setEditQty(Number(e.target.value))}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-bold ${isLow ? "text-red-500" : "text-slate-800"}`}>
+                            {item.quantity}
+                          </span>
+                          <span className="text-xs text-slate-400">{item.unit}</span>
+                          <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden hidden sm:block">
+                            <div
+                              className={`h-full rounded-full transition-all ${isLow ? "bg-red-400" : "bg-green-400"}`}
+                              style={{
+                                width: `${Math.min(100,
+                                  (item.quantity / Math.max(item.low_stock_threshold * 3, 1)) * 100
+                                )}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Unit Price */}
+                    <td className="px-5 py-3.5">
+                      <span className="text-sm text-slate-700 font-mono">
+                        {userCurrency} {item.price.toFixed(2)}
+                      </span>
+                    </td>
+
+                    {/* Total Value */}
+                    <td className="px-5 py-3.5">
+                      <span className="text-sm font-semibold text-slate-800 font-mono">
+                        {userCurrency} {(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-5 py-3.5 text-right">
+                      {isEditing ? (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button onClick={() => saveEdit(item)} title="Save"
+                            className="p-1.5 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition">
+                            <Check size={15} />
+                          </button>
+                          <button onClick={cancelEdit} title="Cancel"
+                            className="p-1.5 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-lg transition">
+                            <X size={15} />
+                          </button>
+                        </div>
+                      ) : isDeleting ? (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <span className="text-xs text-red-500 font-medium mr-1">Delete?</span>
+                          <button onClick={() => handleDelete(item.id)}
+                            className="px-2.5 py-1 text-xs font-bold bg-red-500 hover:bg-red-600 text-white rounded-lg transition">
+                            Yes
+                          </button>
+                          <button onClick={() => setDeleteConfirmId(null)}
+                            className="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition">
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button onClick={() => startEdit(item)} title="Edit name & quantity"
+                            className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-500 rounded-lg transition">
+                            <Pencil size={15} />
+                          </button>
+                          <button onClick={() => { setDeleteConfirmId(item.id); setEditingId(null); }} title="Delete"
+                            className="p-1.5 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition">
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
+
+        {/* Table footer */}
+        {filteredInventory.length > 0 && (
+          <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
+            <span className="text-xs text-slate-400">
+              {filteredInventory.length} of {inventory.length} item{inventory.length !== 1 ? "s" : ""}
+            </span>
+            <span className="text-xs text-slate-400 font-mono">
+              Total value:{" "}
+              <span className="font-semibold text-slate-600">
+                {userCurrency} {totalValue.toFixed(2)}
+              </span>
+            </span>
+          </div>
+        )}
       </div>
+
+      {/* Modal */}
+      <ItemModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSaveNew}
+        initial={modalInitial}
+        title={modalTitle}
+      />
     </div>
   );
 }

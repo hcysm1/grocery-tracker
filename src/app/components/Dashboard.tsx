@@ -4,9 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import ReceiptScanner from "./modules/ReceiptScanner";
 import MonthlyDashboard from "./modules/MonthlyDashboard";
 import SpendingAnalysis from "./modules/SpendingAnalysis";
-import Inventory from "./modules/Inventory";
+import InventoryDashboard from "./modules/Inventory";
 import { Sheet, Home, Settings, Loader2, Package, PieChart, CreditCard } from "lucide-react";
 import { getReceiptsAction } from "@/app/actions/get-receipts";
+import { fetchInventoryAction } from "../actions/inventory";
+
+const { data: inventory } = await fetchInventoryAction();
+
 
 type ActiveTab = "dashboard" | "receipts" | "inventory" | "spending";
 
@@ -39,6 +43,8 @@ export default function Dashboard() {
   const handleReceiptAdded = async () => {
     await refreshData();
   };
+
+
 
   const navigationItems = [
     { id: "dashboard", label: "Overview", icon: Home },
@@ -135,7 +141,8 @@ export default function Dashboard() {
                   <ReceiptScanner onReceiptAdded={handleReceiptAdded} />
                 )}
                 {activeTab === "inventory" && (
-                  <Inventory receipts={receipts} userCurrency={userProfile.currency} />
+                 
+                 <InventoryDashboard receipts={receipts} userCurrency="RM" initialInventory={inventory ?? []} />
                 )}
                 {activeTab === "spending" && (
                   <SpendingAnalysis receipts={receipts} userCurrency={userProfile.currency}/>
