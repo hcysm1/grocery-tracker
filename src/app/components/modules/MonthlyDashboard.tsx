@@ -21,7 +21,7 @@ interface MonthlyDashboardProps {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const COLORS = ["#00B14F", "#0EA5E9", "#8B5CF6", "#F59E0B", "#EC4899", "#06B6D4"];
+const COLORS = ["#00B14F", "#F97316", "#EAB308", "#06B6D4", "#8B5CF6", "#EC4899"];
 
 const tooltipBase = {
   backgroundColor: "#0F172A",
