@@ -21,7 +21,7 @@ interface MonthlyDashboardProps {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const COLORS = ["#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981", "#06B6D4"];
+const COLORS = ["#00B14F", "#0EA5E9", "#8B5CF6", "#F59E0B", "#EC4899", "#06B6D4"];
 
 const tooltipBase = {
   backgroundColor: "#0F172A",
@@ -255,15 +255,15 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
               type: "linear",
               x: 1, y: 0, x2: 0, y2: 0,
               colorStops: [
-                { offset: 0, color: "#3B82F6" },
-                { offset: 1, color: "#BFDBFE" },
+                { offset: 0, color: "#00B14F" },
+                { offset: 1, color: "#bbf7d0" },
               ],
             },
           },
           label: {
             show: true,
             position: "right" as const,
-            color: "#3B82F6",
+            color: "#00B14F",
             fontFamily: "ui-monospace, monospace",
             fontSize: 11,
             formatter: (p: any) => `${userCurrency} ${Number(p.value).toFixed(2)}`,
@@ -323,7 +323,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
               value={`${userCurrency} ${currentMonthData.total.toFixed(2)}`}
               sub="This month"
               icon={<Wallet size={16} />}
-              accent="#3B82F6"
+              accent="#00B14F"
             />
             <KpiCard
               label="Receipts"
@@ -358,7 +358,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
                   <h3 className="font-bold text-slate-800">Store Breakdown</h3>
                   <p className="text-xs text-slate-400 mt-0.5">Spend distribution by retailer</p>
                 </div>
-                <span className="text-xs font-medium px-2 py-1 bg-blue-50 text-blue-600 rounded-full">
+                <span className="text-xs font-medium px-2 py-1 bg-green-50 text-[#00B14F] rounded-full">
                   {currentMonthData.stores.length} Stores
                 </span>
               </div>
@@ -421,7 +421,7 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
                               {item.name}
                             </span>
                             <div className="flex items-center gap-1.5">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[#00B14F] bg-green-50 px-1.5 py-0.5 rounded">
                                 {item.category}
                               </span>
                               <span className="text-xs text-slate-400">
