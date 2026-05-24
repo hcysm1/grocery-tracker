@@ -122,7 +122,7 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
     onClose();
   };
 
-  const inputCls = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition bg-slate-50/50 placeholder:text-slate-400";
+  const inputCls = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40 focus:border-[#00B14F] transition bg-slate-50/50 placeholder:text-slate-400";
   const labelCls = "block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1.5";
 
   return (
@@ -152,7 +152,7 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
             <div className="flex-shrink-0">
               <label className={labelCls}>Icon</label>
               <input
-                className="w-14 h-[42px] border border-slate-200 rounded-xl text-center text-xl bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                className="w-14 h-[42px] border border-slate-200 rounded-xl text-center text-xl bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40"
                 value={emoji}
                 onChange={(e) => setEmoji(e.target.value)}
                 maxLength={2}
@@ -412,7 +412,7 @@ export default function InventoryDashboard({
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <KpiCard label="Total Items"  value={inventory.length}
-          sub="Unique products tracked"    icon={<Package size={16}/>}    accent="#3B82F6" />
+          sub="Unique products tracked"    icon={<Package size={16}/>}    accent="#00B14F" />
         <KpiCard label="Total Value"  value={`${userCurrency} ${totalValue.toFixed(2)}`}
           sub="Estimated stock value"      icon={<DollarSign size={16}/>} accent="#10B981" />
         <KpiCard label="Low Stock"    value={lowStockCount}
@@ -449,7 +449,7 @@ export default function InventoryDashboard({
         <div className="relative flex-1" ref={searchRef}>
           <Search className="absolute left-3 top-2.5 text-slate-400 z-10" size={18} />
           <input
-            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition"
+            className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40 focus:border-[#00B14F] transition"
             placeholder="Search inventory or add from receipts…"
             value={searchTerm}
             autoComplete="off"
@@ -468,7 +468,7 @@ export default function InventoryDashboard({
                   </p>
                   <button
                     onClick={() => openAddModal({ name: searchTerm })}
-                    className="w-full flex items-center gap-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-lg transition"
+                    className="w-full flex items-center gap-2 text-sm font-semibold text-[#00B14F] hover:bg-green-50 px-3 py-2 rounded-lg transition"
                   >
                     <Plus size={14} /> Create "{searchTerm}" as new item
                   </button>
@@ -509,7 +509,7 @@ export default function InventoryDashboard({
                             In inventory
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold bg-blue-50 text-blue-500 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-bold bg-green-50 text-[#00B14F] px-2 py-0.5 rounded-full">
                             + Add
                           </span>
                         )}
@@ -521,7 +521,7 @@ export default function InventoryDashboard({
                     <div className="border-t border-slate-100 px-4 py-2.5">
                       <button
                         onClick={() => openAddModal({ name: searchTerm })}
-                        className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:bg-blue-50 w-full px-2 py-1.5 rounded-lg transition"
+                        className="flex items-center gap-2 text-sm font-semibold text-[#00B14F] hover:bg-green-50 w-full px-2 py-1.5 rounded-lg transition"
                       >
                         <Plus size={13} /> Create "{searchTerm}" as new item
                       </button>
@@ -536,7 +536,7 @@ export default function InventoryDashboard({
         {/* Category filter */}
         <div className="relative">
           <select
-            className="appearance-none border border-slate-200 rounded-xl pl-3 pr-8 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition text-slate-700"
+            className="appearance-none border border-slate-200 rounded-xl pl-3 pr-8 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40 focus:border-[#00B14F] transition text-slate-700"
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
           >
@@ -570,7 +570,7 @@ export default function InventoryDashboard({
                       <p className="text-sm font-medium text-slate-600">No items yet</p>
                       <p className="text-xs mt-0.5">
                         Search above to add from your receipts, or{" "}
-                        <button onClick={() => openAddModal()} className="text-blue-500 underline">
+                        <button onClick={() => openAddModal()} className="text-[#00B14F] underline">
                           add manually
                         </button>
                       </p>
@@ -592,7 +592,7 @@ export default function InventoryDashboard({
                     <td className="px-5 py-3.5">
                       {isEditing ? (
                         <input autoFocus
-                          className="border border-blue-300 rounded-lg px-2.5 py-1.5 text-sm w-40 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                          className="border border-[#00B14F]/50 rounded-lg px-2.5 py-1.5 text-sm w-40 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/30"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
                         />
@@ -616,7 +616,7 @@ export default function InventoryDashboard({
 
                     {/* Category */}
                     <td className="px-5 py-3.5">
-                      <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                      <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-green-50 text-[#00B14F] border border-green-100">
                         {item.category}
                       </span>
                     </td>
@@ -625,7 +625,7 @@ export default function InventoryDashboard({
                     <td className="px-5 py-3.5">
                       {isEditing ? (
                         <input type="number" min={0}
-                          className="border border-blue-300 rounded-lg px-2.5 py-1.5 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                          className="border border-[#00B14F]/50 rounded-lg px-2.5 py-1.5 text-sm w-20 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/30"
                           value={editQty}
                           onChange={(e) => setEditQty(Number(e.target.value))}
                         />
@@ -691,7 +691,7 @@ export default function InventoryDashboard({
                       ) : (
                         <div className="flex items-center justify-end gap-1.5">
                           <button onClick={() => startEdit(item)} title="Edit name & quantity"
-                            className="p-1.5 hover:bg-blue-50 text-slate-400 hover:text-blue-500 rounded-lg transition">
+                            className="p-1.5 hover:bg-green-50 text-slate-400 hover:text-[#00B14F] rounded-lg transition">
                             <Pencil size={15} />
                           </button>
                           <button onClick={() => { setDeleteConfirmId(item.id); setEditingId(null); }} title="Delete"
