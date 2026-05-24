@@ -73,7 +73,7 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
       {/* HEADER */}
       <div>
         <h2 className="text-3xl font-bold text-slate-900 mb-2">Scan Receipt</h2>
-        <p className="text-slate-600">Upload a photo of your grocery receipt. Our AI will extract all items and prices automatically.</p>
+        <p className="text-slate-600">Upload a photo of your grocery receipt.</p>
       </div>
 
       {/* UPLOAD SECTION */}
