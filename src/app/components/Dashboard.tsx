@@ -32,8 +32,6 @@ const refreshData = useCallback(async () => {
       const { data: inventoryData } = await fetchInventoryAction(); // Rename to avoid confusion
       
       setReceipts(receiptsData || []);
-      
-      // 2. Set the state here so it's accessible globally in the component
       setInventory(inventoryData || []); 
       
     } catch (error) {

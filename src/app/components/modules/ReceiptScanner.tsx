@@ -81,7 +81,7 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
         {/* UPLOAD AREA */}
         <div className="lg:col-span-2">
           <label className="block">
-            <div className="relative border-2 border-dashed border-slate-300 rounded-xl p-8 hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer bg-white">
+            <div className="relative border-2 border-dashed border-slate-300 rounded-xl p-8 hover:border-[#00B14F] hover:bg-green-50 transition cursor-pointer bg-white">
               <input
                 type="file"
                 accept="image/*"
@@ -117,7 +117,7 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
           {!preview && (
             <div className="mt-4 flex gap-3">
               <label className="flex-1">
-                <div className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition">
+                <div className="bg-[#00B14F] hover:bg-[#009944] text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition">
                   <Upload size={20} />
                   Upload File
                 </div>
@@ -142,23 +142,23 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
         </div>
 
         {/* STATS CARD */}
-        <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
           <h3 className="font-semibold text-slate-900 mb-4">📊 Quick Tips</h3>
           <ul className="space-y-3 text-sm text-slate-700">
             <li className="flex gap-2">
-              <span className="text-blue-600">✓</span>
+              <span className="text-[#00B14F]">✓</span>
               <span>Take photos in good lighting</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-blue-600">✓</span>
+              <span className="text-[#00B14F]">✓</span>
               <span>Keep receipt flat and straight</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-blue-600">✓</span>
+              <span className="text-[#00B14F]">✓</span>
               <span>Capture all items clearly</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-blue-600">✓</span>
+              <span className="text-[#00B14F]">✓</span>
               <span>Include store name and date</span>
             </li>
           </ul>
@@ -173,7 +173,7 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
               ? "bg-green-50 border-green-200 text-green-800"
               : statusType === "error"
               ? "bg-red-50 border-red-200 text-red-800"
-              : "bg-blue-50 border-blue-200 text-blue-800"
+              : "bg-green-50 border-green-200 text-[#00B14F]"
           }`}
         >
           {statusType === "success" ? (
