@@ -42,7 +42,7 @@ interface SpendingAnalysisProps {
 
 // ─── Palette & ECharts base styles ───────────────────────────────────────────
 
-const PALETTE = ["#2563EB", "#F59E0B", "#10B981", "#EF4444", "#8B5CF6", "#06B6D4", "#F97316", "#EC4899"];
+const PALETTE = ["#00B14F", "#0EA5E9", "#10B981", "#EF4444", "#8B5CF6", "#06B6D4", "#F97316", "#EC4899"];
 
 const axisBase = {
   axisLine:  { lineStyle: { color: "#E2E8F0" } },
@@ -115,7 +115,7 @@ function ChartCard({
           {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
         </div>
         {tag && (
-          <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-blue-50 text-blue-500 border border-blue-100 whitespace-nowrap">
+          <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-green-50 text-[#00B14F] border border-green-100 whitespace-nowrap">
             {tag}
           </span>
         )}
@@ -285,8 +285,8 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
           color: {
             type: "linear", x: 0, y: 0, x2: 0, y2: 1,
             colorStops: [
-              { offset: 0, color: "#2563EB" },
-              { offset: 1, color: "#93C5FD" },
+              { offset: 0, color: "#00B14F" },
+              { offset: 1, color: "#bbf7d0" },
             ],
           },
         },
@@ -414,15 +414,15 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
           color: {
             type: "linear", x: 1, y: 0, x2: 0, y2: 0,
             colorStops: [
-              { offset: 0, color: "#10B981" },
-              { offset: 1, color: "#D1FAE5" },
+              { offset: 0, color: "#00B14F" },
+              { offset: 1, color: "#bbf7d0" },
             ],
           },
         },
         label: {
           show: true,
           position: "right" as const,
-          color: "#10B981",
+          color: "#00B14F",
           fontFamily: "ui-monospace, monospace",
           fontSize: 11,
         },
@@ -517,7 +517,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
         yAxisIndex: 0,
         data: weekdayCounts,
         barMaxWidth: 32,
-        itemStyle: { color: "#2563EB", borderRadius: [6, 6, 0, 0] },
+        itemStyle: { color: "#00B14F", borderRadius: [6, 6, 0, 0] },
       },
       {
         name: "Total Spend",
@@ -597,7 +597,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
             <div className="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-0.5">
               Total Spend
             </div>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-[#00B14F]">
               {userCurrency} {totalSpent.toFixed(2)}
             </div>
           </div>
@@ -670,7 +670,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
                       <div>
                         <div className="text-sm font-semibold text-slate-700 capitalize">{item.name}</div>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-50 text-blue-500">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-green-50 text-[#00B14F]">
                             {item.category}
                           </span>
                           <span className="text-[11px] text-slate-400">
