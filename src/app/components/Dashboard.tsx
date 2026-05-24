@@ -81,17 +81,6 @@ const refreshData = useCallback(async () => {
               <Loader2 className="animate-spin" size={16} /> Updating...
             </div>
           )}
-
-          <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-gray-100 text-gray-600 rounded-full transition-colors">
-              <Settings size={20} />
-            </button>
-            <div className="w-8 h-8 bg-gray-200 rounded-full border-2 border-white shadow-sm overflow-hidden">
-               <div className="w-full h-full bg-[#00B14F]/10 flex items-center justify-center text-[#00B14F] font-bold text-xs">
-                 {userProfile.name[0]}
-               </div>
-            </div>
-          </div>
         </div>
       </header>
 
