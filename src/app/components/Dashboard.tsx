@@ -75,12 +75,6 @@ const refreshData = useCallback(async () => {
               
             </div>
           </div>
-          
-          {loading && (
-            <div className="flex items-center gap-2 text-[#00B14F] text-sm font-bold">
-              <Loader2 className="animate-spin" size={16} /> Updating...
-            </div>
-          )}
         </div>
       </header>
 
