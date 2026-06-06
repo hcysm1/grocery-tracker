@@ -440,13 +440,13 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
 
           {/* ── Category + Store ───────────────────────────────────────────── */}
           <SectionLabel>Breakdown</SectionLabel>
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-4">
             <div className="lg:col-span-3">
               <ChartCard title="Spend by Category" subtitle="Where your money goes">
                 <ReactECharts option={categoryOption} style={{ height: 260 }} notMerge />
               </ChartCard>
             </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
               <ChartCard title="Top Stores" subtitle="Ranked by total spend">
                 <ReactECharts option={storeOption} style={{ height: 260 }} notMerge />
               </ChartCard>
