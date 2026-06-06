@@ -58,10 +58,10 @@ const tooltipBase = {
   backgroundColor: "#0F172A",
   borderColor:     "#1E293B",
   textStyle: { color: "#F8FAFC", fontFamily: "sans-serif", fontSize: 13 },
-  extraCssText: "border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);",
+  extraCssText: "border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);max-width:280px;white-space:normal;",
 };
 
-const gridBase = { left: 16, right: 16, top: 12, bottom: 8, containLabel: true };
+const gridBase = { left: 8, right: 8, top: 12, bottom: 8, containLabel: true };
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 
@@ -82,14 +82,14 @@ function KpiCard({
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</span>
         <div
-          className="w-8 h-8 rounded-xl flex items-center justify-center"
+          className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: `${accent}15` }}
         >
           <span style={{ color: accent }}>{icon}</span>
         </div>
       </div>
       <div>
-        <div className="text-2xl font-bold text-slate-800 leading-tight">{value}</div>
+        <div className="text-2xl font-bold text-slate-800 leading-tight break-all">{value}</div>
         <div className="text-xs text-slate-400 mt-0.5">{sub}</div>
       </div>
     </div>
@@ -98,7 +98,7 @@ function KpiCard({
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 mt-4 mb-3">
+    <div className="flex items-center gap-3 mt-6 mb-4">
       <span className="text-[10px] font-bold uppercase tracking-[.16em] text-slate-400 whitespace-nowrap">
         {children}
       </span>
@@ -111,12 +111,14 @@ function ChartCard({
   title, subtitle, children,
 }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-6">
+    <div className="bg-white border border-slate-100 rounded-2xl shadow-sm p-4 sm:p-6">
       <div className="mb-5">
         <h3 className="font-semibold text-slate-800 text-sm">{title}</h3>
         {subtitle && <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>}
       </div>
-      {children}
+      <div className="w-full overflow-hidden">
+        {children}
+      </div>
     </div>
   );
 }
@@ -209,12 +211,12 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
     },
     legend: {
       bottom: 0,
-      textStyle: { color: "#94A3B8", fontSize: 12 },
+      textStyle: { color: "#94A3B8", fontSize: 11 },
       icon: "circle",
       itemWidth: 8,
       itemHeight: 8,
     },
-    grid: { ...gridBase, bottom: 40 },
+    grid: { ...gridBase, bottom: 40, right: 8 },
     xAxis: { ...axisBase, type: "category" as const, data: months.map((m) => m.label), boundaryGap: true },
     yAxis: {
       ...axisBase,
@@ -226,7 +228,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
         name: "Monthly Total",
         type: "bar",
         data: monthTotals,
-        barMaxWidth: 44,
+        barMaxWidth: 32,
         itemStyle: {
           borderRadius: [5, 5, 0, 0],
           color: {
@@ -269,22 +271,22 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
         `<b>${p.name}</b><br/>${userCurrency} ${p.value} &nbsp;<span style="opacity:.6">(${p.percent}%)</span>`,
     },
     legend: {
-      orient: "vertical" as const,
-      right: 4,
-      top: "middle",
-      textStyle: { color: "#64748B", fontSize: 12 },
-      formatter: (name: string) => (name.length > 14 ? name.slice(0, 14) + "…" : name),
+      orient: "horizontal" as const,
+      bottom: 0,
+      left: "center",
+      textStyle: { color: "#64748B", fontSize: 11 },
+      formatter: (name: string) => (name.length > 10 ? name.slice(0, 10) + "…" : name),
     },
     series: [
       {
         name: "Category",
         type: "pie",
-        radius: ["44%", "68%"],
-        center: ["36%", "50%"],
+        radius: ["40%", "65%"],
+        center: ["50%", "42%"],
         avoidLabelOverlap: true,
         label: { show: false },
         emphasis: {
-          label: { show: true, fontSize: 13, fontWeight: "bold", color: "#1E293B" },
+          label: { show: true, fontSize: 12, fontWeight: "bold", color: "#1E293B" },
           scaleSize: 3,
         },
         data: catData,
@@ -303,19 +305,23 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
       formatter: (p: any[]) =>
         `<b>${p[0].axisValue}</b>: <b>${userCurrency} ${Number(p[0].value).toFixed(2)}</b>`,
     },
-    grid: { left: 12, right: 52, top: 8, bottom: 8, containLabel: true },
+    grid: { left: 8, right: 56, top: 8, bottom: 8, containLabel: true },
     xAxis: { ...axisBase, type: "value" as const },
     yAxis: {
       ...axisBase,
       type: "category" as const,
       data: stores.map((s) => s[0]),
       axisLine: { show: false },
+      axisLabel: {
+        ...axisBase.axisLabel,
+        formatter: (value: string) => (value.length > 12 ? value.slice(0, 12) + "…" : value),
+      }
     },
     series: [
       {
         type: "bar",
         data: stores.map((s) => +s[1].toFixed(2)),
-        barMaxWidth: 20,
+        barMaxWidth: 16,
         itemStyle: {
           borderRadius: [0, 5, 5, 0],
           color: GREEN,
@@ -324,7 +330,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
           show: true,
           position: "right" as const,
           color: "#94A3B8",
-          fontSize: 11,
+          fontSize: 10,
           formatter: (p: any) => `${userCurrency}${Number(p.value).toFixed(0)}`,
         },
       },
@@ -344,12 +350,12 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
     },
     legend: {
       bottom: 0,
-      textStyle: { color: "#94A3B8", fontSize: 12 },
+      textStyle: { color: "#94A3B8", fontSize: 11 },
       icon: "circle",
       itemWidth: 8,
       itemHeight: 8,
     },
-    grid: { ...gridBase, bottom: 40 },
+    grid: { ...gridBase, bottom: 40, right: 8 },
     xAxis: { ...axisBase, type: "category" as const, data: dayNames },
     yAxis: [
       { ...axisBase, type: "value" as const, name: "Trips", nameTextStyle: { color: "#94A3B8", fontSize: 10 } },
@@ -367,7 +373,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
         type: "bar",
         yAxisIndex: 0,
         data: weekdayCounts,
-        barMaxWidth: 32,
+        barMaxWidth: 20,
         itemStyle: { color: GREEN, borderRadius: [5, 5, 0, 0] },
       },
       {
@@ -389,10 +395,10 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
   const noData = receipts.length === 0;
 
   return (
-    <div className="space-y-2 pb-12">
+    <div className="space-y-4 pb-12 px-2 sm:px-4 max-w-7xl mx-auto">
 
       {/* Page header */}
-      <div className="flex justify-between items-end mb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-end mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Spending Analysis</h1>
           <p className="text-slate-400 text-sm mt-0.5">
@@ -402,7 +408,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
           </p>
         </div>
         {!noData && (
-          <div className="text-right">
+          <div className="text-left sm:text-right border-t border-slate-100 pt-3 sm:pt-0 sm:border-none">
             <div className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-0.5">
               Total Spend
             </div>
@@ -414,7 +420,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
       </div>
 
       {noData ? (
-        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 py-24 text-center">
+        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 py-16 sm:py-24 text-center px-4">
           <div className="text-5xl mb-4">🧾</div>
           <h3 className="text-lg font-semibold text-slate-700">No receipts yet</h3>
           <p className="text-sm text-slate-400 mt-1">Scan a receipt to unlock your spending insights.</p>
@@ -423,7 +429,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
         <>
           {/* ── KPI row ────────────────────────────────────────────────────── */}
           <SectionLabel>Overview</SectionLabel>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-2">
             <KpiCard label="Total Receipts" value={totalReceipts}                            sub="Scanned"   icon={<ShoppingCart size={16}/>} accent={GREEN}   />
             <KpiCard label="Avg. Trip"      value={`${userCurrency} ${avgTrip.toFixed(2)}`} sub="Per visit" icon={<TrendingUp size={16}/>}   accent={AMBER}   />
             <KpiCard label="Stores"         value={storeMap.size}                            sub="Unique"    icon={<Store size={16}/>}        accent="#64748B" />
@@ -443,7 +449,7 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             <div className="lg:col-span-3">
               <ChartCard title="Spend by Category" subtitle="Where your money goes">
-                <ReactECharts option={categoryOption} style={{ height: 260 }} notMerge />
+                <ReactECharts option={categoryOption} style={{ height: 280 }} notMerge />
               </ChartCard>
             </div>
             <div className="lg:col-span-2">
@@ -459,28 +465,28 @@ export default function SpendingAnalysis({ receipts, userCurrency }: SpendingAna
 
             {/* Top spend items list */}
             <ChartCard title="Top Spend Items" subtitle="Highest total expenditure by item">
-              <div className="divide-y divide-slate-50">
+              <div className="divide-y divide-slate-50 max-h-[320px] overflow-y-auto pr-1">
                 {topBySpend.map((item, i) => (
-                  <div key={item.name} className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold text-slate-300 w-5 text-center">#{i + 1}</span>
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-slate-50 border border-slate-100">
+                  <div key={item.name} className="flex items-center justify-between py-3 gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-xs font-bold text-slate-300 w-5 text-center flex-shrink-0">#{i + 1}</span>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg bg-slate-50 border border-slate-100 flex-shrink-0">
                         {item.emoji}
                       </div>
-                      <div>
-                        <div className="text-sm font-medium text-slate-700 capitalize">{item.name}</div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium text-slate-700 capitalize truncate">{item.name}</div>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
                           <span
-                            className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                            className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded truncate max-w-[100px]"
                             style={{ background: GREEN_SOFT, color: GREEN }}
                           >
                             {item.category}
                           </span>
-                          <span className="text-[11px] text-slate-400">{+item.count.toFixed(1)} units</span>
+                          <span className="text-[11px] text-slate-400 flex-shrink-0">{+item.count.toFixed(1)} units</span>
                         </div>
                       </div>
                     </div>
-                    <div className="text-sm font-bold text-slate-800">
+                    <div className="text-sm font-bold text-slate-800 flex-shrink-0">
                       {userCurrency} {item.total.toFixed(2)}
                     </div>
                   </div>
