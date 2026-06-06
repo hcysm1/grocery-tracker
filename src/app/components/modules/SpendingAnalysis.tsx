@@ -41,7 +41,9 @@ const GREEN_SOFT = "#D1FAE5";
 const AMBER      = "#D97706";
 
 // Category donut: slate steps + one green for variety without rainbow chaos
-const CAT_PALETTE = ["#059669", "#64748B", "#94A3B8", "#CBD5E1", "#334155", "#475569", "#0F172A", "#0EA5E9"];
+const CAT_PALETTE = [
+  "#059669", "#D97706", "#10B981", "#F59E0B", "#34D399", "#FBBF24", "#047857", "#B45309", 
+];
 
 // ─── ECharts shared styles ────────────────────────────────────────────────────
 
