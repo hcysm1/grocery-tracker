@@ -54,7 +54,7 @@ const refreshData = useCallback(async () => {
   const navigationItems = [
     { id: "dashboard", label: "Overview", icon: Home },
     { id: "receipts", label: "Scan Receipt", icon: Sheet },
-    { id: "inventory", label: "Pantry", icon: Package },
+    { id: "inventory", label: "Inventory", icon: Package },
     { id: "spending", label: "Analysis", icon: PieChart },
   ];
 
