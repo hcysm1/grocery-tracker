@@ -436,14 +436,6 @@ export default function MonthlyDashboard({ receipts, userCurrency }: MonthlyDash
                       </div>
                     ))}
                   </div>
-
-                  {/* Spend comparison bar */}
-                  <div className="border-t border-slate-100 pt-4">
-                    <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1">
-                      Spend Comparison
-                    </p>
-                    <ReactECharts option={topItemsBarOption} style={{ height: 140 }} notMerge />
-                  </div>
                 </>
               ) : (
                 <div className="text-center py-8 text-slate-400 text-sm">No items this month</div>
