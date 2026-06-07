@@ -103,9 +103,10 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
       {/* Sheet slides up from bottom on mobile, centered modal on sm+ */}
-      <div className="relative bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+      <div className="relative bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] sm:max-h-[90vh]">
 
-        <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100">
+        {/* Header — fixed, never scrolls */}
+        <div className="flex-shrink-0 flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100">
           {/* Drag handle on mobile */}
           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-slate-200 sm:hidden" />
           <h2 className="font-bold text-slate-800 text-base sm:text-lg mt-2 sm:mt-0">{title}</h2>
@@ -114,7 +115,8 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
           </button>
         </div>
 
-        <div className="px-5 sm:px-6 py-5 space-y-4 max-h-[75vh] overflow-y-auto">
+        {/* Body — scrollable middle */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4">
           {error && (
             <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
               <AlertTriangle size={14} /> {error}
@@ -181,13 +183,14 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
           </p>
         </div>
 
-        <div className="px-5 sm:px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
+        {/* Footer — fixed, never scrolls */}
+        <div className="flex-shrink-0 px-5 sm:px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-white">
           <button onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">
+            className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">
             Cancel
           </button>
           <button onClick={handleSave} disabled={saving || !name.trim()}
-            className="px-5 py-2 text-sm font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            className="px-5 py-2.5 text-sm font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
             Save Item
           </button>
@@ -334,7 +337,7 @@ export default function InventoryDashboard({
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
         <KpiCard label="Total Items"  value={inventory.length}
           sub="Unique products tracked"    icon={<Package size={15}/>}    accent="#00B14F" />
         <KpiCard label="Total Value"  value={`${userCurrency} ${totalValue.toFixed(2)}`}
