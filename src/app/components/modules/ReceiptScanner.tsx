@@ -14,17 +14,13 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
   const [status, setStatus] = useState("");
   const [statusType, setStatusType] = useState<"success" | "error" | "info">("info");
   const [preview, setPreview] = useState<string | null>(null);
-  
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Show preview
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreview(e.target?.result as string);
-    };
+    reader.onload = (ev) => setPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
 
     setLoading(true);
@@ -52,15 +48,11 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
         setStatusType("success");
         setStatus("✓ Receipt processed successfully!");
         setPreview(null);
-        // Reset file input
         const fileInput = e.target;
         fileInput.value = "";
-        // Call callback to notify parent of new receipt
-        if (result.receipt) {
-          onReceiptAdded(result.receipt);
-        }
+        if (result.receipt) onReceiptAdded(result.receipt);
       }
-    } catch (error) {
+    } catch {
       setStatusType("error");
       setStatus("Error: Something went wrong processing the receipt");
     } finally {
@@ -69,19 +61,21 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
   }
 
   return (
-    <div className="space-y-6">
-      {/* HEADER */}
+    <div className="space-y-5">
+
+      {/* Header */}
       <div>
-        <h2 className="text-3xl font-bold text-slate-900 mb-2">Scan Receipt</h2>
-        <p className="text-slate-600">Upload a photo of your grocery receipt.</p>
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1">Scan Receipt</h2>
+        <p className="text-slate-500 text-sm">Upload a photo of your grocery receipt.</p>
       </div>
 
-      {/* UPLOAD SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* UPLOAD AREA */}
-        <div className="lg:col-span-2">
+      {/* Upload + Tips */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+
+        {/* Upload area */}
+        <div className="lg:col-span-2 space-y-3">
           <label className="block">
-            <div className="relative border-2 border-dashed border-slate-300 rounded-xl p-8 hover:border-[#00B14F] hover:bg-green-50 transition cursor-pointer bg-white">
+            <div className="relative border-2 border-dashed border-slate-300 rounded-2xl p-6 sm:p-8 hover:border-[#00B14F] hover:bg-green-50 transition cursor-pointer bg-white">
               <input
                 type="file"
                 accept="image/*"
@@ -93,40 +87,44 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
               <div className="flex flex-col items-center justify-center text-center">
                 {preview ? (
                   <>
-                    <img src={preview} alt="Preview" className="max-w-xs max-h-64 rounded-lg mb-4" />
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="max-w-[260px] sm:max-w-xs max-h-60 sm:max-h-64 rounded-xl mb-4 shadow-sm"
+                    />
                     <button
                       onClick={() => setPreview(null)}
-                      className="flex items-center gap-2 text-sm text-slate-600 hover:text-red-600 mb-4"
+                      className="flex items-center gap-2 text-sm text-slate-500 hover:text-red-500 transition"
                     >
-                      <X size={16} /> Change Image
+                      <X size={15} /> Change Image
                     </button>
                   </>
                 ) : (
                   <>
-                    <Camera className="w-16 h-16 text-slate-400 mb-4" />
-                    <p className="text-lg font-semibold text-slate-900 mb-1">Upload Receipt</p>
-                    <p className="text-sm text-slate-600">Drag and drop or click to select</p>
-                    <p className="text-xs text-slate-500 mt-2">JPG, PNG up to 5MB</p>
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-4">
+                      <Camera className="text-slate-400" size={28} />
+                    </div>
+                    <p className="text-base sm:text-lg font-semibold text-slate-900 mb-1">Upload Receipt</p>
+                    <p className="text-sm text-slate-500">Tap to select or drag and drop</p>
+                    <p className="text-xs text-slate-400 mt-1.5">JPG, PNG up to 5 MB</p>
                   </>
                 )}
               </div>
             </div>
           </label>
 
-          {/* ALTERNATIVE BUTTON */}
+          {/* Action buttons */}
           {!preview && (
-            <div className="mt-4 flex gap-3">
-              <label className="flex-1">
-                <div className="bg-[#00B14F] hover:bg-[#009944] text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition">
-                  <Upload size={20} />
-                  Upload File
+            <div className="grid grid-cols-2 gap-3">
+              <label>
+                <div className="bg-[#00B14F] hover:bg-[#009944] active:bg-[#007a3a] text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition text-sm">
+                  <Upload size={18} /> Upload File
                 </div>
                 <input type="file" accept="image/*" onChange={handleUpload} disabled={loading} className="hidden" />
               </label>
-              <label className="flex-1">
-                <div className="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition">
-                  <Camera size={20} />
-                  Take Photo
+              <label>
+                <div className="bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition text-sm">
+                  <Camera size={18} /> Take Photo
                 </div>
                 <input
                   type="file"
@@ -141,47 +139,42 @@ export default function ReceiptScanner({ onReceiptAdded }: ReceiptScannerProps) 
           )}
         </div>
 
-        {/* STATS CARD */}
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
-          <h3 className="font-semibold text-slate-900 mb-4">📊 Quick Tips</h3>
-          <ul className="space-y-3 text-sm text-slate-700">
-            <li className="flex gap-2">
-              <span className="text-[#00B14F]">✓</span>
-              <span>Take photos in good lighting</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-[#00B14F]">✓</span>
-              <span>Keep receipt flat and straight</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-[#00B14F]">✓</span>
-              <span>Capture all items clearly</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-[#00B14F]">✓</span>
-              <span>Include store name and date</span>
-            </li>
+        {/* Tips card */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-5">
+          <h3 className="font-semibold text-slate-800 mb-4 text-sm">📊 Quick Tips</h3>
+          <ul className="space-y-3 text-sm text-slate-600">
+            {[
+              "Take photos in good lighting",
+              "Keep receipt flat and straight",
+              "Capture all items clearly",
+              "Include store name and date",
+            ].map((tip) => (
+              <li key={tip} className="flex gap-2">
+                <span className="text-[#00B14F] flex-shrink-0">✓</span>
+                <span>{tip}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
 
-      {/* STATUS MESSAGE */}
+      {/* Status message */}
       {status && (
         <div
-          className={`p-4 rounded-lg flex items-center gap-3 border ${
+          className={`p-4 rounded-xl flex items-center gap-3 border text-sm ${
             statusType === "success"
               ? "bg-green-50 border-green-200 text-green-800"
               : statusType === "error"
               ? "bg-red-50 border-red-200 text-red-800"
-              : "bg-green-50 border-green-200 text-[#00B14F]"
+              : "bg-blue-50 border-blue-200 text-[#00B14F]"
           }`}
         >
           {statusType === "success" ? (
-            <CheckCircle className="flex-shrink-0" size={20} />
+            <CheckCircle className="flex-shrink-0" size={18} />
           ) : statusType === "error" ? (
-            <AlertCircle className="flex-shrink-0" size={20} />
+            <AlertCircle className="flex-shrink-0" size={18} />
           ) : (
-            <Loader2 className="animate-spin flex-shrink-0" size={20} />
+            <Loader2 className="animate-spin flex-shrink-0" size={18} />
           )}
           <p className="font-medium">{status}</p>
         </div>
