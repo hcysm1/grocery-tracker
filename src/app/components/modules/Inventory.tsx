@@ -100,29 +100,43 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
   const labelCls = "block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1.5";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    /* Outer: full screen overlay, sheet anchored to bottom on mobile */
+    <div className="fixed inset-0 z-50 flex flex-col justify-end sm:items-center sm:justify-center sm:p-4">
+      {/* Backdrop */}
       <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={onClose} />
-      {/* Sheet slides up from bottom on mobile, centered modal on sm+ */}
-      <div className="relative bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] sm:max-h-[90vh]">
 
-        {/* Header — fixed, never scrolls */}
-        <div className="flex-shrink-0 flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100">
-          {/* Drag handle on mobile */}
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full bg-slate-200 sm:hidden" />
-          <h2 className="font-bold text-slate-800 text-base sm:text-lg mt-2 sm:mt-0">{title}</h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition mt-2 sm:mt-0">
+      {/*
+        Modal card:
+        - On mobile: full-width sheet, max 85% of viewport height (leaves room above for status bar)
+        - flex-col so header/footer are always visible, only body scrolls
+        - We do NOT use items-end on the outer so the footer never dips below the visible area
+      */}
+      <div
+        className="relative bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl border border-slate-100"
+        style={{ display: "flex", flexDirection: "column", maxHeight: "85dvh" }}
+      >
+        {/* Drag handle (mobile only) */}
+        <div className="flex-shrink-0 flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="w-10 h-1 rounded-full bg-slate-200" />
+        </div>
+
+        {/* ── Header ── always visible, never scrolls */}
+        <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-slate-100">
+          <h2 className="font-bold text-slate-800 text-base">{title}</h2>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
             <X size={18} className="text-slate-500" />
           </button>
         </div>
 
-        {/* Body — scrollable middle */}
-        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-4">
+        {/* ── Body ── scrollable, takes remaining space */}
+        <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-4">
           {error && (
             <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
               <AlertTriangle size={14} /> {error}
             </div>
           )}
 
+          {/* Emoji + Name */}
           <div className="flex gap-3">
             <div className="flex-shrink-0">
               <label className={labelCls}>Icon</label>
@@ -140,6 +154,7 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
             </div>
           </div>
 
+          {/* Category */}
           <div>
             <label className={labelCls}>Category</label>
             <div className="relative">
@@ -151,6 +166,7 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
             </div>
           </div>
 
+          {/* Quantity + Unit */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelCls}>Quantity</label>
@@ -164,6 +180,7 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
             </div>
           </div>
 
+          {/* Price + Threshold */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className={labelCls}>Unit Price</label>
@@ -183,14 +200,19 @@ function ItemModal({ open, onClose, onSave, initial, title }: ModalProps) {
           </p>
         </div>
 
-        {/* Footer — fixed, never scrolls */}
-        <div className="flex-shrink-0 px-5 sm:px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-white">
-          <button onClick={onClose}
-            className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">
+        {/* ── Footer ── always visible, never scrolls, full-width buttons on mobile */}
+        <div className="flex-shrink-0 px-5 py-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+          <button
+            onClick={onClose}
+            className="w-full sm:w-auto px-4 py-3 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+          >
             Cancel
           </button>
-          <button onClick={handleSave} disabled={saving || !name.trim()}
-            className="px-5 py-2.5 text-sm font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button
+            onClick={handleSave}
+            disabled={saving || !name.trim()}
+            className="w-full sm:w-auto px-5 py-3 text-sm font-semibold bg-[#00B14F] hover:bg-[#009944] text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
             Save Item
           </button>
