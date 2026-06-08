@@ -2,6 +2,10 @@
 
 A grocery receipt scanner and spending tracker built for Malaysian households.
 
+# Demo
+
+https://receipt-track.vercel.app
+
 ---
 
 ## What it does
