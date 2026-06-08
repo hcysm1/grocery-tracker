@@ -2,8 +2,8 @@ import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'AI Grocery Tracker',
-    short_name: 'GroceryAI',
+    name: 'Grocery Track',
+    short_name: 'Grocery Track',
     description: 'Track grocery prices with Gemini',
     start_url: '/',
     display: 'standalone', // This hides the browser UI
