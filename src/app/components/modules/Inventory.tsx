@@ -162,7 +162,7 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} />
 
       <div
-        className="absolute inset-x-0 bottom-16 flex flex-col bg-white rounded-3xl shadow-2xl sm:rounded-2xl sm:max-w-md sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full"
+        className="absolute inset-x-0 bottom-16 flex flex-col bg-white rounded-3xl overflow-hidden shadow-2xl sm:max-w-md sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full"
         style={{ maxHeight: "calc(100svh - 80px)" }}
       >
         <div className="flex-shrink-0 flex justify-center pt-2.5 pb-0 sm:hidden">
