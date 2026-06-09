@@ -162,8 +162,8 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} />
 
       <div
-        className="absolute inset-x-0 flex flex-col bg-white rounded-t-3xl shadow-2xl sm:rounded-2xl sm:max-w-md sm:mx-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
-        style={{ bottom: "64px", maxHeight: "calc(100svh - 80px)" }}
+        className="absolute inset-x-0 bottom-16 flex flex-col bg-white rounded-t-3xl shadow-2xl sm:rounded-2xl sm:max-w-md sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full"
+        style={{ maxHeight: "calc(100svh - 80px)" }}
       >
         <div className="flex-shrink-0 flex justify-center pt-2.5 pb-0 sm:hidden">
           <div className="w-8 h-1 rounded-full bg-slate-300" />
@@ -228,13 +228,13 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
         </div>
 
         <div className="flex-shrink-0 px-4 py-3 border-t border-slate-100 bg-white grid grid-cols-2 gap-2 sm:flex sm:justify-end">
-          <button onClick={onClose} className="py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+          <button onClick={onClose} className="py-2.5 px-5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition sm:w-auto">
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving || !fields.name.trim()}
-            className="py-2.5 text-sm font-semibold bg-[#00B14F] hover:bg-[#009944] text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40"
+            className="py-2.5 px-5 text-sm font-semibold bg-[#00B14F] hover:bg-[#009944] text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40 sm:w-auto"
           >
             {saving ? <Loader2 size={14} className="animate-spin" /> : null}
             Save
