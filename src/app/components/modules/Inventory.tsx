@@ -162,7 +162,7 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} />
 
       <div
-        className="absolute inset-x-0 bottom-16 flex flex-col bg-white rounded-t-3xl shadow-2xl sm:rounded-2xl sm:max-w-md sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full"
+        className="absolute inset-x-0 bottom-16 flex flex-col bg-white rounded-3xl shadow-2xl sm:rounded-2xl sm:max-w-md sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full"
         style={{ maxHeight: "calc(100svh - 80px)" }}
       >
         <div className="flex-shrink-0 flex justify-center pt-2.5 pb-0 sm:hidden">
@@ -184,15 +184,9 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
           )}
 
           <div className="flex gap-2">
-            <div>
-              <label className={LABEL_CLS}>Icon</label>
-              <input
-                className="w-12 h-9 border border-slate-200 rounded-xl text-center text-lg bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40"
-                value={fields.emoji} onChange={handleInputChange("emoji")} maxLength={2}
-              />
-            </div>
+          
             <div className="flex-1">
-              <label className={LABEL_CLS}>Item Name <span className="text-red-400">*</span></label>
+              <label className={LABEL_CLS}>Name<span className="text-red-400">*</span></label>
               <input className={INPUT_CLS} placeholder="e.g. Full Cream Milk" value={fields.name} onChange={handleInputChange("name")} />
             </div>
           </div>
@@ -236,7 +230,6 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
             disabled={saving || !fields.name.trim()}
             className="py-2.5 px-5 text-sm font-semibold bg-[#00B14F] hover:bg-[#009944] text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40 sm:w-auto"
           >
-            {saving ? <Loader2 size={14} className="animate-spin" /> : null}
             Save
           </button>
         </div>
