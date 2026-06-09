@@ -31,7 +31,7 @@ const CATEGORIES = [
   "Personal Care", "Baby Products", "Cleaning Product", "Other",
 ];
 
-const INPUT_CLS = "w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40 focus:border-[#00B14F] transition bg-slate-50/50 placeholder:text-slate-400";
+const INPUT_CLS = "w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40 focus:border-[#00B14F] transition bg-slate-50/50 placeholder:text-slate-400";
 const LABEL_CLS = "block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1.5";
 const EDIT_INPUT_CLS = "border border-[#00B14F]/50 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B14F]/30";
 
@@ -132,118 +132,102 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
   };
 
   return (
-    /*
-      On mobile: fixed to bottom, sheet slides up. The outer wrapper uses
-      `inset-x-0 bottom-0` so it always sits at the bottom edge of the
-      real screen — unaffected by the virtual keyboard pushing content up.
-      On sm+: standard centred modal.
-    */
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Sheet — mobile: pinned to bottom. Desktop: centred. */}
-      <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center sm:p-4 pointer-events-none">
-        <div
-          className="pointer-events-auto relative bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl flex flex-col"
-          /*
-            svh = small viewport height — on iOS/Android this is the height
-            with the browser chrome fully shown, so it's the *smallest* the
-            usable area can be. Using 92svh means the sheet never taller
-            than what's visible even when the address bar is present.
-            The footer is flex-shrink-0 so it is ALWAYS rendered; the body
-            scrolls inside the remaining space.
-          */
-          style={{ maxHeight: "92svh" }}
-        >
-          {/* Drag handle — visual cue that the sheet is scrollable/dismissible */}
-          <div className="flex-shrink-0 flex justify-center pt-3 pb-0 sm:hidden">
-            <div className="w-10 h-1 rounded-full bg-slate-300" />
-          </div>
+      {/*
+        Sheet sits above the bottom nav bar (64px = h-16).
+        On desktop it's a centred modal instead.
+      */}
+      <div
+        className="absolute inset-x-0 flex flex-col bg-white rounded-t-3xl shadow-2xl sm:rounded-2xl sm:max-w-md sm:mx-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
+        style={{ bottom: "64px", maxHeight: "calc(100svh - 80px)" }}
+      >
+        {/* Drag handle */}
+        <div className="flex-shrink-0 flex justify-center pt-2.5 pb-0 sm:hidden">
+          <div className="w-8 h-1 rounded-full bg-slate-300" />
+        </div>
 
-          {/* Header */}
-          <div className="flex-shrink-0 flex items-center justify-between px-5 py-3 border-b border-slate-100">
-            <h2 className="font-bold text-slate-800 text-base">Add Item</h2>
-            <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
-              <X size={18} className="text-slate-500" />
-            </button>
-          </div>
+        {/* Header */}
+        <div className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
+          <h2 className="font-bold text-slate-800 text-base">Add Item</h2>
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
+            <X size={18} className="text-slate-500" />
+          </button>
+        </div>
 
-          {/* Body — only this part scrolls */}
-          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-4 space-y-4">
-            {error && (
-              <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                <AlertTriangle size={14} /> {error}
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <div>
-                <label className={LABEL_CLS}>Icon</label>
-                <input className="w-14 h-[42px] border border-slate-200 rounded-xl text-center text-xl bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40"
-                  value={fields.emoji} onChange={set("emoji")} maxLength={2} />
-              </div>
-              <div className="flex-1">
-                <label className={LABEL_CLS}>Item Name <span className="text-red-400">*</span></label>
-                <input className={INPUT_CLS} placeholder="e.g. Full Cream Milk" value={fields.name} onChange={set("name")} />
-              </div>
+        {/* Body — scrollable, compact vertical spacing */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-3 space-y-3">
+          {error && (
+            <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <AlertTriangle size={13} /> {error}
             </div>
+          )}
 
+          {/* Icon + Name on one row */}
+          <div className="flex gap-2">
             <div>
-              <label className={LABEL_CLS}>Category</label>
-              <div className="relative">
-                <select className={`${INPUT_CLS} appearance-none pr-8`} value={fields.category} onChange={set("category")}>
-                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-3.5 text-slate-400 pointer-events-none" />
-              </div>
+              <label className={LABEL_CLS}>Icon</label>
+              <input
+                className="w-12 h-9 border border-slate-200 rounded-xl text-center text-lg bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40"
+                value={fields.emoji} onChange={set("emoji")} maxLength={2}
+              />
             </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={LABEL_CLS}>Quantity</label>
-                <input type="number" min={0} className={INPUT_CLS} value={fields.quantity} onChange={set("quantity")} />
-              </div>
-              <div>
-                <label className={LABEL_CLS}>Unit</label>
-                <input className={INPUT_CLS} placeholder="pcs / kg / L" value={fields.unit} onChange={set("unit")} />
-              </div>
+            <div className="flex-1">
+              <label className={LABEL_CLS}>Item Name <span className="text-red-400">*</span></label>
+              <input className={INPUT_CLS} placeholder="e.g. Full Cream Milk" value={fields.name} onChange={set("name")} />
             </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={LABEL_CLS}>Unit Price</label>
-                <input type="number" min={0} step={0.01} className={INPUT_CLS} value={fields.price} onChange={set("price")} />
-              </div>
-              <div>
-                <label className={LABEL_CLS}>Low Stock Alert ⚠</label>
-                <input type="number" min={0} className={INPUT_CLS} value={fields.low_stock_threshold} onChange={set("low_stock_threshold")} />
-              </div>
-            </div>
-
-            <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
-              <AlertTriangle size={11} /> Warning shows when quantity drops below the Low Stock Alert value.
-            </p>
           </div>
 
-          {/*
-            Footer — flex-shrink-0 means it is NEVER compressed or hidden.
-            pb-safe adds bottom padding on phones with a home indicator (iPhone X+).
-          */}
-          <div
-            className="flex-shrink-0 px-5 pt-3 pb-5 border-t border-slate-100 bg-white grid grid-cols-2 gap-3 sm:flex sm:justify-end sm:pb-4"
-            style={{ paddingBottom: "max(20px, env(safe-area-inset-bottom, 20px))" }}
+          {/* Category */}
+          <div>
+            <label className={LABEL_CLS}>Category</label>
+            <div className="relative">
+              <select className={`${INPUT_CLS} appearance-none pr-8`} value={fields.category} onChange={set("category")}>
+                {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+              </select>
+              <ChevronDown size={13} className="absolute right-3 top-3 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Qty + Unit + Price + Threshold — all 4 in a 2x2 grid */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className={LABEL_CLS}>Quantity</label>
+              <input type="number" min={0} className={INPUT_CLS} value={fields.quantity} onChange={set("quantity")} />
+            </div>
+            <div>
+              <label className={LABEL_CLS}>Unit</label>
+              <input className={INPUT_CLS} placeholder="pcs / kg / L" value={fields.unit} onChange={set("unit")} />
+            </div>
+            <div>
+              <label className={LABEL_CLS}>Unit Price</label>
+              <input type="number" min={0} step={0.01} className={INPUT_CLS} value={fields.price} onChange={set("price")} />
+            </div>
+            <div>
+              <label className={LABEL_CLS}>Low Stock ⚠</label>
+              <input type="number" min={0} className={INPUT_CLS} value={fields.low_stock_threshold} onChange={set("low_stock_threshold")} />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer — always visible, never compressed */}
+        <div className="flex-shrink-0 px-4 py-3 border-t border-slate-100 bg-white grid grid-cols-2 gap-2 sm:flex sm:justify-end">
+          <button
+            onClick={onClose}
+            className="py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition"
           >
-            <button onClick={onClose}
-              className="px-4 py-3 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition">
-              Cancel
-            </button>
-            <button onClick={handleSave} disabled={saving || !fields.name.trim()}
-              className="px-5 py-3 text-sm font-semibold bg-[#00B14F] hover:bg-[#009944] active:bg-[#007a3a] text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
-              {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-              Save Item
-            </button>
-          </div>
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saving || !fields.name.trim()}
+            className="py-2.5 text-sm font-semibold bg-[#00B14F] hover:bg-[#009944] active:bg-[#007a3a] text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+            Save Item
+          </button>
         </div>
       </div>
     </div>
