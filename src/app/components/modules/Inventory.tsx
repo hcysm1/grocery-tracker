@@ -14,14 +14,6 @@ import {
   type NewInventoryItem,
 } from "@/app/actions/inventory";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface InventoryDashboardProps {
-  receipts:         any[];
-  userCurrency:     string;
-  initialInventory: InventoryItem[];
-}
-
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -31,21 +23,19 @@ const CATEGORIES = [
   "Personal Care", "Baby Products", "Cleaning Product", "Other",
 ];
 
-const INPUT_CLS = "w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40 focus:border-[#00B14F] transition bg-slate-50/50 placeholder:text-slate-400";
-const LABEL_CLS = "block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1.5";
-const EDIT_INPUT_CLS = "border border-[#00B14F]/50 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B14F]/30";
+const INPUT_CLS  = "w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40 focus:border-[#00B14F] transition bg-slate-50/50 placeholder:text-slate-400";
+const LABEL_CLS  = "block text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-1";
+const EDIT_INPUT = "border border-[#00B14F]/50 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00B14F]/30";
 
-// ─── Small reusable pieces ────────────────────────────────────────────────────
+const MODAL_DEFAULTS = { name: "", emoji: "📦", category: "Other", quantity: 1, unit: "pcs", price: 0, low_stock_threshold: 5 };
+
+// ─── Shared sub-components ────────────────────────────────────────────────────
 
 function KpiCard({ label, value, sub, icon, accent }: {
-  label: string; value: string | number; sub: string;
-  icon: React.ReactNode; accent: string;
+  label: string; value: string | number; sub: string; icon: React.ReactNode; accent: string;
 }) {
   return (
-    <div
-      className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5 flex flex-col gap-2 hover:shadow-md transition-shadow"
-      style={{ borderTop: `3px solid ${accent}` }}
-    >
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex flex-col gap-2 hover:shadow-md transition-shadow" style={{ borderTop: `3px solid ${accent}` }}>
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</span>
         <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ background: `${accent}18` }}>
@@ -70,7 +60,7 @@ function StockBar({ quantity, threshold, isLow }: { quantity: number; threshold:
   const pct = Math.min(100, (quantity / Math.max(threshold * 3, 1)) * 100);
   return (
     <div className="w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-      <div className={`h-full rounded-full transition-all ${isLow ? "bg-red-400" : "bg-green-400"}`} style={{ width: `${pct}%` }} />
+      <div className={`h-full rounded-full ${isLow ? "bg-red-400" : "bg-green-400"}`} style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -89,8 +79,8 @@ function RowActions({ isEditing, isDeleting, onEdit, onSave, onCancelEdit, onDel
   if (isDeleting) return (
     <div className="flex items-center gap-1.5">
       <span className="text-xs text-red-500 font-medium">Delete?</span>
-      <button onClick={onDelete}         className="px-2.5 py-1 text-xs font-bold bg-red-500 hover:bg-red-600 text-white rounded-lg transition">Yes</button>
-      <button onClick={onCancelDelete}   className="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition">No</button>
+      <button onClick={onDelete}       className="px-2.5 py-1 text-xs font-bold bg-red-500 hover:bg-red-600 text-white rounded-lg transition">Yes</button>
+      <button onClick={onCancelDelete} className="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition">No</button>
     </div>
   );
   return (
@@ -101,22 +91,101 @@ function RowActions({ isEditing, isDeleting, onEdit, onSave, onCancelEdit, onDel
   );
 }
 
-// ─── Add Item Modal ───────────────────────────────────────────────────────────
+// ─── Modal form contents (shared between desktop + mobile) ────────────────────
 
-const MODAL_DEFAULTS = { name: "", emoji: "📦", category: "Other", quantity: 1, unit: "pcs", price: 0, low_stock_threshold: 5 };
+function ModalForm({ fields, error, saving, set, onClose, onSave }: {
+  fields: typeof MODAL_DEFAULTS;
+  error: string; saving: boolean;
+  set: (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onClose: () => void;
+  onSave: () => void;
+}) {
+  return (
+    <>
+      {/* Header */}
+      <div className="flex-shrink-0 flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
+        <h2 className="font-bold text-slate-800 text-base">Add Item</h2>
+        <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
+          <X size={18} className="text-slate-500" />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-4 space-y-3">
+        {error && (
+          <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <AlertTriangle size={13} /> {error}
+          </div>
+        )}
+
+        {/* Name */}
+        <div>
+          <label className={LABEL_CLS}>Name <span className="text-red-400">*</span></label>
+          <input className={INPUT_CLS} placeholder="e.g. Full Cream Milk" value={fields.name} onChange={set("name")} />
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className={LABEL_CLS}>Category</label>
+          <div className="relative">
+            <select className={`${INPUT_CLS} appearance-none pr-8`} value={fields.category} onChange={set("category")}>
+              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            </select>
+            <ChevronDown size={13} className="absolute right-3 top-2.5 text-slate-400 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* All 4 number fields in a 2×2 grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={LABEL_CLS}>Quantity</label>
+            <input type="number" min={0} className={INPUT_CLS} value={fields.quantity} onChange={set("quantity")} />
+          </div>
+          <div>
+            <label className={LABEL_CLS}>Unit</label>
+            <input className={INPUT_CLS} placeholder="pcs / kg / L" value={fields.unit} onChange={set("unit")} />
+          </div>
+          <div>
+            <label className={LABEL_CLS}>Unit Price</label>
+            <input type="number" min={0} step={0.01} className={INPUT_CLS} value={fields.price} onChange={set("price")} />
+          </div>
+          <div>
+            <label className={LABEL_CLS}>Low Stock ⚠</label>
+            <input type="number" min={0} className={INPUT_CLS} value={fields.low_stock_threshold} onChange={set("low_stock_threshold")} />
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex-shrink-0 px-5 py-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-3 sm:flex sm:justify-end">
+        <button onClick={onClose}
+          className="py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition">
+          Cancel
+        </button>
+        <button onClick={onSave} disabled={saving || !fields.name.trim()}
+          className="py-2.5 text-sm font-semibold bg-[#00B14F] hover:bg-[#009944] active:bg-[#007a3a] text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+          Save
+        </button>
+      </div>
+    </>
+  );
+}
+
+// ─── Modal shell ──────────────────────────────────────────────────────────────
 
 function ItemModal({ open, onClose, onSave, initial = {} }: {
   open: boolean; onClose: () => void;
   onSave: (item: NewInventoryItem) => Promise<void>;
   initial?: Partial<NewInventoryItem>;
 }) {
-  const merged = { ...MODAL_DEFAULTS, ...initial };
-  const [fields, setFields] = useState(merged);
+  const [fields, setFields] = useState({ ...MODAL_DEFAULTS, ...initial });
   const [saving, setSaving] = useState(false);
   const [error,  setError]  = useState("");
 
-  // Re-sync fields whenever the modal opens with new prefill data
-  useEffect(() => { if (open) { setFields({ ...MODAL_DEFAULTS, ...initial }); setError(""); } }, [open]);
+  useEffect(() => {
+    if (open) { setFields({ ...MODAL_DEFAULTS, ...initial }); setError(""); }
+  }, [open]);
 
   if (!open) return null;
 
@@ -124,117 +193,45 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
     setFields((f) => ({ ...f, [key]: e.target.type === "number" ? Number(e.target.value) : e.target.value }));
 
   const handleSave = async () => {
-    if (!fields.name.trim()) { setError("Item name is required."); return; }
+    if (!fields.name.trim()) { setError("Name is required."); return; }
     setSaving(true);
     await onSave({ ...fields, name: fields.name.trim(), product_id: initial?.product_id ?? null });
     setSaving(false);
     onClose();
   };
 
+  const formProps = { fields, error, saving, set, onClose, onSave: handleSave };
+
   return (
     <div className="fixed inset-0 z-50">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={onClose} />
 
-      {/*
-        Sheet sits above the bottom nav bar (64px = h-16).
-        On desktop it's a centred modal instead.
-      */}
+      {/* Desktop — centred modal */}
+      <div className="hidden sm:flex absolute inset-0 items-center justify-center p-6">
+        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm flex flex-col">
+          <ModalForm {...formProps} />
+        </div>
+      </div>
+
+      {/* Mobile — bottom sheet above nav bar */}
       <div
-        className="absolute inset-x-0 flex flex-col bg-white rounded-t-3xl shadow-2xl sm:rounded-2xl sm:max-w-md sm:mx-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2"
+        className="sm:hidden absolute inset-x-0 flex flex-col bg-white rounded-t-2xl shadow-2xl"
         style={{ bottom: "64px", maxHeight: "calc(100svh - 80px)" }}
       >
-        {/* Drag handle */}
-        <div className="flex-shrink-0 flex justify-center pt-2.5 pb-0 sm:hidden">
+        <div className="flex justify-center pt-2.5">
           <div className="w-8 h-1 rounded-full bg-slate-300" />
         </div>
-
-        {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-slate-100">
-          <h2 className="font-bold text-slate-800 text-base">Add Item</h2>
-          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition">
-            <X size={18} className="text-slate-500" />
-          </button>
-        </div>
-
-        {/* Body — scrollable, compact vertical spacing */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-3 space-y-3">
-          {error && (
-            <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              <AlertTriangle size={13} /> {error}
-            </div>
-          )}
-
-          {/* Icon + Name on one row */}
-          <div className="flex gap-2">
-            <div>
-              <label className={LABEL_CLS}>Icon</label>
-              <input
-                className="w-12 h-9 border border-slate-200 rounded-xl text-center text-lg bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40"
-                value={fields.emoji} onChange={set("emoji")} maxLength={2}
-              />
-            </div>
-            <div className="flex-1">
-              <label className={LABEL_CLS}>Item Name <span className="text-red-400">*</span></label>
-              <input className={INPUT_CLS} placeholder="e.g. Full Cream Milk" value={fields.name} onChange={set("name")} />
-            </div>
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className={LABEL_CLS}>Category</label>
-            <div className="relative">
-              <select className={`${INPUT_CLS} appearance-none pr-8`} value={fields.category} onChange={set("category")}>
-                {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-              </select>
-              <ChevronDown size={13} className="absolute right-3 top-3 text-slate-400 pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Qty + Unit + Price + Threshold — all 4 in a 2x2 grid */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className={LABEL_CLS}>Quantity</label>
-              <input type="number" min={0} className={INPUT_CLS} value={fields.quantity} onChange={set("quantity")} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Unit</label>
-              <input className={INPUT_CLS} placeholder="pcs / kg / L" value={fields.unit} onChange={set("unit")} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Unit Price</label>
-              <input type="number" min={0} step={0.01} className={INPUT_CLS} value={fields.price} onChange={set("price")} />
-            </div>
-            <div>
-              <label className={LABEL_CLS}>Low Stock ⚠</label>
-              <input type="number" min={0} className={INPUT_CLS} value={fields.low_stock_threshold} onChange={set("low_stock_threshold")} />
-            </div>
-          </div>
-        </div>
-
-        {/* Footer — always visible, never compressed */}
-        <div className="flex-shrink-0 px-4 py-3 border-t border-slate-100 bg-white grid grid-cols-2 gap-2 sm:flex sm:justify-end">
-          <button
-            onClick={onClose}
-            className="py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 rounded-xl transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving || !fields.name.trim()}
-            className="py-2.5 text-sm font-semibold bg-[#00B14F] hover:bg-[#009944] active:bg-[#007a3a] text-white rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-            Save Item
-          </button>
-        </div>
+        <ModalForm {...formProps} />
       </div>
     </div>
   );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
+
+interface InventoryDashboardProps {
+  receipts: any[]; userCurrency: string; initialInventory: InventoryItem[];
+}
 
 export default function InventoryDashboard({ receipts, userCurrency, initialInventory }: InventoryDashboardProps) {
   const [inventory,       setInventory]       = useState<InventoryItem[]>(initialInventory);
@@ -259,29 +256,24 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ── Derived data ────────────────────────────────────────────────────────────
-
   const productSuggestions = useMemo(() => {
     const map = new Map<string, { name: string; emoji: string; category: string; unit: string; lastPrice: number; product_id: string | null }>();
     receipts.forEach((r) =>
       (r.receipt_items || []).forEach((it: any) => {
         const p = it.products;
         if (!p?.name) return;
-        map.set(p.name, {
-          name: p.name, emoji: p.emoji ?? "📦", category: p.category ?? "Other",
-          unit: it.unit ?? "pcs", lastPrice: Number(it.unit_price) || 0, product_id: p.id ?? null,
-        });
+        map.set(p.name, { name: p.name, emoji: p.emoji ?? "📦", category: p.category ?? "Other", unit: it.unit ?? "pcs", lastPrice: Number(it.unit_price) || 0, product_id: p.id ?? null });
       })
     );
     return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [receipts]);
 
-  const inventoryNames     = useMemo(() => new Set(inventory.map((i) => i.name.toLowerCase())), [inventory]);
-  const allCategories      = useMemo(() => ["All", ...Array.from(new Set(inventory.map((i) => i.category))).sort()], [inventory]);
+  const inventoryNames      = useMemo(() => new Set(inventory.map((i) => i.name.toLowerCase())), [inventory]);
+  const allCategories       = useMemo(() => ["All", ...Array.from(new Set(inventory.map((i) => i.category))).sort()], [inventory]);
   const filteredSuggestions = useMemo(() =>
     searchTerm.trim() ? productSuggestions.filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase())) : productSuggestions,
     [productSuggestions, searchTerm]);
-  const filteredInventory  = useMemo(() =>
+  const filteredInventory   = useMemo(() =>
     inventory.filter((item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (filterCategory === "All" || item.category === filterCategory)
@@ -289,8 +281,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
 
   const totalValue    = inventory.reduce((s, i) => s + i.price * i.quantity, 0);
   const lowStockCount = inventory.filter((i) => i.quantity <= i.low_stock_threshold).length;
-
-  // ── Handlers ────────────────────────────────────────────────────────────────
 
   const openAddModal = (prefill: Partial<NewInventoryItem> = {}) => {
     setModalInitial(prefill);
@@ -307,10 +297,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
   };
 
   const startEdit = (item: InventoryItem) => {
-    setEditingId(item.id);
-    setEditName(item.name);
-    setEditQty(item.quantity);
-    setDeleteConfirmId(null);
+    setEditingId(item.id); setEditName(item.name); setEditQty(item.quantity); setDeleteConfirmId(null);
   };
 
   const saveEdit = async (item: InventoryItem) => {
@@ -332,13 +319,9 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
     <div className="bg-white border-2 border-dashed border-slate-200 rounded-2xl py-14 text-center px-4">
       <Package size={32} className="text-slate-300 mx-auto mb-3" />
       <p className="text-sm font-medium text-slate-600">No items yet</p>
-      <p className="text-xs text-slate-400 mt-1">
-        Search above or <button onClick={() => openAddModal()} className="text-[#00B14F] underline">add manually</button>
-      </p>
+      <p className="text-xs text-slate-400 mt-1">Search above or <button onClick={() => openAddModal()} className="text-[#00B14F] underline">add manually</button></p>
     </div>
   );
-
-  // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
     <div className="space-y-5 sm:space-y-6">
@@ -350,24 +333,23 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
           <p className="text-slate-500 text-sm mt-0.5">Track stock levels for your household items</p>
         </div>
         <button onClick={() => openAddModal()}
-          className="bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl flex items-center gap-1.5 hover:bg-slate-700 transition text-sm font-semibold shadow-sm flex-shrink-0">
+          className="bg-slate-900 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 hover:bg-slate-700 transition text-sm font-semibold shadow-sm flex-shrink-0">
           <Plus size={15} /> Add Item
         </button>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-        <KpiCard label="Total Items" value={inventory.length}    sub="Unique products tracked"    icon={<Package size={15}/>}    accent="#00B14F" />
-        <KpiCard label="Total Value" value={`${userCurrency} ${totalValue.toFixed(2)}`} sub="Estimated stock value" icon={<DollarSign size={15}/>} accent="#10B981" />
-        <KpiCard label="Low Stock"   value={lowStockCount}       sub={lowStockCount === 0 ? "All stocked up!" : "Items need restocking"}
-          icon={<ShieldAlert size={15}/>} accent={lowStockCount > 0 ? "#EF4444" : "#10B981"} />
+        <KpiCard label="Total Items" value={inventory.length}                          sub="Unique products tracked"    icon={<Package size={15}/>}    accent="#00B14F" />
+        <KpiCard label="Total Value" value={`${userCurrency} ${totalValue.toFixed(2)}`} sub="Estimated stock value"      icon={<DollarSign size={15}/>} accent="#10B981" />
+        <KpiCard label="Low Stock"   value={lowStockCount}                              sub={lowStockCount === 0 ? "All stocked up!" : "Items need restocking"} icon={<ShieldAlert size={15}/>} accent={lowStockCount > 0 ? "#EF4444" : "#10B981"} />
       </div>
 
       {/* Alert banners */}
       {lowStockCount > 0 && (
         <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
           <AlertTriangle size={15} className="flex-shrink-0 text-red-500" />
-          <b>{lowStockCount} item{lowStockCount > 1 ? "s are" : " is"} running low</b> — consider restocking soon.
+          <span><b>{lowStockCount} item{lowStockCount > 1 ? "s are" : " is"} running low</b> — consider restocking soon.</span>
         </div>
       )}
       {actionError && (
@@ -435,7 +417,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
             </div>
           )}
         </div>
-
         <div className="relative">
           <select
             className="appearance-none border border-slate-200 rounded-xl pl-3 pr-8 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#00B14F]/40 focus:border-[#00B14F] transition text-slate-700 w-full sm:w-auto"
@@ -461,9 +442,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
               <tr><td colSpan={6} className="px-5 py-16 text-center">
                 <Package size={36} className="text-slate-300 mx-auto mb-3" />
                 <p className="text-sm font-medium text-slate-600">No items yet</p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Search above or <button onClick={() => openAddModal()} className="text-[#00B14F] underline">add manually</button>
-                </p>
+                <p className="text-xs text-slate-400 mt-0.5">Search above or <button onClick={() => openAddModal()} className="text-[#00B14F] underline">add manually</button></p>
               </td></tr>
             ) : filteredInventory.map((item) => {
               const isLow      = item.quantity <= item.low_stock_threshold;
@@ -473,7 +452,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                 <tr key={item.id} className={`hover:bg-slate-50/80 transition ${isLow ? "bg-red-50/40" : ""}`}>
                   <td className="px-5 py-3.5">
                     {isEditing ? (
-                      <input autoFocus className={`${EDIT_INPUT_CLS} w-40`} value={editName} onChange={(e) => setEditName(e.target.value)} />
+                      <input autoFocus className={`${EDIT_INPUT} w-40`} value={editName} onChange={(e) => setEditName(e.target.value)} />
                     ) : (
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-lg flex-shrink-0">{item.emoji}</div>
@@ -487,7 +466,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                   <td className="px-5 py-3.5"><CategoryBadge category={item.category} /></td>
                   <td className="px-5 py-3.5">
                     {isEditing ? (
-                      <input type="number" min={0} className={`${EDIT_INPUT_CLS} w-20`} value={editQty} onChange={(e) => setEditQty(Number(e.target.value))} />
+                      <input type="number" min={0} className={`${EDIT_INPUT} w-20`} value={editQty} onChange={(e) => setEditQty(Number(e.target.value))} />
                     ) : (
                       <div className="flex items-center gap-2">
                         <span className={`text-sm font-bold ${isLow ? "text-red-500" : "text-slate-800"}`}>{item.quantity}</span>
@@ -502,8 +481,8 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                     <div className="flex justify-end">
                       <RowActions
                         isEditing={isEditing} isDeleting={isDeleting}
-                        onEdit={() => startEdit(item)}   onSave={() => saveEdit(item)}   onCancelEdit={() => setEditingId(null)}
-                        onDelete={() => { isEditing ? null : (isDeleting ? handleDelete(item.id) : (setDeleteConfirmId(item.id), setEditingId(null))); }}
+                        onEdit={() => startEdit(item)} onSave={() => saveEdit(item)} onCancelEdit={() => setEditingId(null)}
+                        onDelete={() => isDeleting ? handleDelete(item.id) : (setDeleteConfirmId(item.id), setEditingId(null))}
                         onCancelDelete={() => setDeleteConfirmId(null)}
                       />
                     </div>
@@ -516,7 +495,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
         {filteredInventory.length > 0 && (
           <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
             <span className="text-xs text-slate-400">{filteredInventory.length} of {inventory.length} item{inventory.length !== 1 ? "s" : ""}</span>
-            <span className="text-xs text-slate-400 font-mono">Total value: <span className="font-semibold text-slate-600">{userCurrency} {totalValue.toFixed(2)}</span></span>
+            <span className="text-xs text-slate-400 font-mono">Total: <span className="font-semibold text-slate-600">{userCurrency} {totalValue.toFixed(2)}</span></span>
           </div>
         )}
       </div>
@@ -533,7 +512,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                 <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xl flex-shrink-0">{item.emoji}</div>
                 <div className="flex-1 min-w-0">
                   {isEditing
-                    ? <input autoFocus className={`${EDIT_INPUT_CLS} w-full mb-1`} value={editName} onChange={(e) => setEditName(e.target.value)} />
+                    ? <input autoFocus className={`${EDIT_INPUT} w-full mb-1`} value={editName} onChange={(e) => setEditName(e.target.value)} />
                     : <div className="text-sm font-semibold text-slate-800 truncate">{item.name}</div>
                   }
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -544,8 +523,8 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                 <div className="flex-shrink-0">
                   <RowActions
                     isEditing={isEditing} isDeleting={isDeleting}
-                    onEdit={() => startEdit(item)}   onSave={() => saveEdit(item)}   onCancelEdit={() => setEditingId(null)}
-                    onDelete={() => { isEditing ? null : (isDeleting ? handleDelete(item.id) : (setDeleteConfirmId(item.id), setEditingId(null))); }}
+                    onEdit={() => startEdit(item)} onSave={() => saveEdit(item)} onCancelEdit={() => setEditingId(null)}
+                    onDelete={() => isDeleting ? handleDelete(item.id) : (setDeleteConfirmId(item.id), setEditingId(null))}
                     onCancelDelete={() => setDeleteConfirmId(null)}
                   />
                 </div>
@@ -553,7 +532,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
               <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between bg-slate-50/50">
                 <div className="flex items-center gap-2">
                   {isEditing
-                    ? <input type="number" min={0} className={`${EDIT_INPUT_CLS} w-16`} value={editQty} onChange={(e) => setEditQty(Number(e.target.value))} />
+                    ? <input type="number" min={0} className={`${EDIT_INPUT} w-16`} value={editQty} onChange={(e) => setEditQty(Number(e.target.value))} />
                     : <span className={`text-sm font-bold ${isLow ? "text-red-500" : "text-slate-800"}`}>{item.quantity}</span>
                   }
                   <span className="text-xs text-slate-400">{item.unit}</span>
