@@ -417,14 +417,15 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
         </div>
       </div>
 
-      {/* ── DESKTOP VIEW MAPPING ──────────────────────────────────────────────── */}
-      <div className="hidden sm:block bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      {/* ── UNIFIED RESPONSIVE TABLE ──────────────────────────────────────────── */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <table className="w-full">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              {["Item", "Category", "Stock", "Actions"].map((h, i) => (
-                <th key={h} className={`px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 ${i === 3 ? "text-right" : "text-left"}`}>{h}</th>
-              ))}
+              <th className="px-4 sm:px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-left">Item</th>
+              <th className="hidden sm:table-cell px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-left">Category</th>
+              <th className="px-4 sm:px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-left">Stock</th>
+              <th className="px-4 sm:px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -441,22 +442,23 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                 const isDeleting = deleteConfirmId === item.id;
                 return (
                   <tr key={item.id} className={`hover:bg-slate-50/80 transition ${isLow ? "bg-red-50/40" : ""}`}>
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 sm:px-5 py-3.5">
                       {isEditing ? (
-                        <input autoFocus className={`${EDIT_INPUT_CLS} w-40`} value={editName} onChange={(e) => setEditName(e.target.value)} />
+                        <input autoFocus className={`${EDIT_INPUT_CLS} w-32 sm:w-40`} value={editName} onChange={(e) => setEditName(e.target.value)} />
                       ) : (
-                        <div className="flex items-center gap-3">
-                          <div>
-                            <div className="text-sm font-semibold text-slate-800">{item.name}</div>
-                            {isLow && <div className="flex items-center gap-1 mt-0.5"><AlertTriangle size={10} className="text-red-500" /><span className="text-[10px] font-semibold text-red-500">Low stock</span></div>}
+                        <div>
+                          <div className="text-sm font-semibold text-slate-800">{item.name}</div>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            <span className="sm:hidden"><CategoryBadge category={item.category} /></span>
+                            {isLow && <div className="flex items-center gap-1"><AlertTriangle size={10} className="text-red-500" /><span className="text-[10px] font-semibold text-red-500">Low stock</span></div>}
                           </div>
                         </div>
                       )}
                     </td>
-                    <td className="px-5 py-3.5"><CategoryBadge category={item.category} /></td>
-                    <td className="px-5 py-3.5">
+                    <td className="hidden sm:table-cell px-5 py-3.5"><CategoryBadge category={item.category} /></td>
+                    <td className="px-4 sm:px-5 py-3.5">
                       {isEditing ? (
-                        <input type="number" min={0} className={`${EDIT_INPUT_CLS} w-20`} value={editQty} onChange={(e) => setEditQty(Number(e.target.value))} />
+                        <input type="number" min={0} className={`${EDIT_INPUT_CLS} w-16 sm:w-20`} value={editQty} onChange={(e) => setEditQty(Number(e.target.value))} />
                       ) : (
                         <div className="flex items-center gap-2">
                           <span className={`text-sm font-bold ${isLow ? "text-red-500" : "text-slate-800"}`}>{item.quantity}</span>
@@ -465,7 +467,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                         </div>
                       )}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-4 sm:px-5 py-3.5">
                       <div className="flex justify-end">
                         <RowActions
                           isEditing={isEditing} isDeleting={isDeleting}
@@ -480,54 +482,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* ── MOBILE CARD VIEW MAPPING ──────────────────────────────────────────── */}
-      <div className="sm:hidden space-y-3">
-        {filteredInventory.length === 0 ? (
-          <EmptyState onAdd={() => openAddModal()} />
-        ) : (
-          filteredInventory.map((item) => {
-            const isLow = item.quantity <= item.low_stock_threshold;
-            const isEditing = editingId === item.id;
-            const isDeleting = deleteConfirmId === item.id;
-            return (
-              <div key={item.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition ${isLow ? "border-red-200 bg-red-50/30" : "border-slate-200"}`}>
-                <div className="flex items-center gap-3 px-4 py-3.5">
-                  <div className="flex-1 min-w-0">
-                    {isEditing ? (
-                      <input autoFocus className={`${EDIT_INPUT_CLS} w-full mb-1`} value={editName} onChange={(e) => setEditName(e.target.value)} />
-                    ) : (
-                      <div className="text-sm font-semibold text-slate-800 truncate">{item.name}</div>
-                    )}
-                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      <CategoryBadge category={item.category} />
-                      {isLow && <span className="flex items-center gap-0.5 text-[10px] font-semibold text-red-500"><AlertTriangle size={9} /> Low stock</span>}
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <RowActions
-                      isEditing={isEditing} isDeleting={isDeleting}
-                      onEdit={() => startEdit(item)} onSave={() => saveEdit(item)} onCancel={() => { setEditingId(null); setDeleteConfirmId(null); }}
-                      onDeleteIntent={() => { setDeleteConfirmId(item.id); setEditingId(null); }} onDeleteConfirm={() => handleDelete(item.id)}
-                    />
-                  </div>
-                </div>
-                <div className="border-t border-slate-100 px-4 py-2.5 flex items-center bg-slate-50/50">
-                  <div className="flex items-center gap-2">
-                    {isEditing ? (
-                      <input type="number" min={0} className={`${EDIT_INPUT_CLS} w-16`} value={editQty} onChange={(e) => setEditQty(Number(e.target.value))} />
-                    ) : (
-                      <span className={`text-sm font-bold ${isLow ? "text-red-500" : "text-slate-800"}`}>{item.quantity}</span>
-                    )}
-                    <span className="text-xs text-slate-400">{item.unit}</span>
-                    <StockBar quantity={item.quantity} threshold={item.low_stock_threshold} isLow={isLow} />
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
       </div>
 
       <ItemModal open={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSaveNew} initial={modalInitial} />
