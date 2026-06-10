@@ -446,7 +446,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                         <input autoFocus className={`${EDIT_INPUT_CLS} w-40`} value={editName} onChange={(e) => setEditName(e.target.value)} />
                       ) : (
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-lg flex-shrink-0">{item.emoji}</div>
                           <div>
                             <div className="text-sm font-semibold text-slate-800">{item.name}</div>
                             {isLow && <div className="flex items-center gap-1 mt-0.5"><AlertTriangle size={10} className="text-red-500" /><span className="text-[10px] font-semibold text-red-500">Low stock</span></div>}
@@ -481,11 +480,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
             )}
           </tbody>
         </table>
-        {filteredInventory.length > 0 && (
-          <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
-            <span className="text-xs text-slate-400">{filteredInventory.length} of {inventory.length} item{inventory.length !== 1 ? "s" : ""}</span>
-          </div>
-        )}
       </div>
 
       {/* ── MOBILE CARD VIEW MAPPING ──────────────────────────────────────────── */}
@@ -500,7 +494,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
             return (
               <div key={item.id} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition ${isLow ? "border-red-200 bg-red-50/30" : "border-slate-200"}`}>
                 <div className="flex items-center gap-3 px-4 py-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xl flex-shrink-0">{item.emoji}</div>
                   <div className="flex-1 min-w-0">
                     {isEditing ? (
                       <input autoFocus className={`${EDIT_INPUT_CLS} w-full mb-1`} value={editName} onChange={(e) => setEditName(e.target.value)} />
@@ -534,11 +527,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
               </div>
             );
           })
-        )}
-        {filteredInventory.length > 0 && (
-          <div className="text-center text-xs text-slate-400 py-1">
-            {filteredInventory.length} of {inventory.length} item{inventory.length !== 1 ? "s" : ""}
-          </div>
         )}
       </div>
 
