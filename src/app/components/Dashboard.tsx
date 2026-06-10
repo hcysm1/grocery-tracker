@@ -133,7 +133,7 @@ export default function Dashboard() {
                   <ReceiptScanner onReceiptAdded={handleReceiptAdded} />
                 )}
                 {activeTab === "inventory" && (
-                  <InventoryDashboard receipts={receipts} userCurrency="RM" initialInventory={inventory ?? []} />
+                  <InventoryDashboard receipts={receipts}  initialInventory={inventory ?? []} />
                 )}
                 {activeTab === "spending" && (
                   <SpendingAnalysis receipts={receipts} userCurrency={userProfile.currency} />
