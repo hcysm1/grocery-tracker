@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Plus, Search, Pencil, Trash2, Check, X,
-  AlertTriangle, Package, DollarSign, ShieldAlert,
+  AlertTriangle, Package, ShieldAlert,
   ChevronDown, Loader2,
 } from "lucide-react";
 import {
@@ -37,26 +37,6 @@ const EDIT_INPUT_CLS = "border border-[#00B14F]/50 rounded-lg px-2.5 py-1.5 text
 
 // ─── SHARED UI COMPONENTS ─────────────────────────────────────────────────────
 
-function KpiCard({ label, value, sub, icon, accent }: {
-  label: string; value: string | number; sub: string;
-  icon: React.ReactNode; accent: string;
-}) {
-  return (
-    <div
-      className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5 flex flex-col gap-2 hover:shadow-md transition-shadow"
-      style={{ borderTop: `3px solid ${accent}` }}
-    >
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{label}</span>
-        <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ background: `${accent}18` }}>
-          <span style={{ color: accent }}>{icon}</span>
-        </div>
-      </div>
-      <div className="text-lg sm:text-2xl font-bold text-slate-800 leading-tight break-all">{value}</div>
-      <div className="text-[10px] sm:text-xs text-slate-400">{sub}</div>
-    </div>
-  );
-}
 
 function CategoryBadge({ category }: { category: string }) {
   return (
@@ -210,11 +190,7 @@ function ItemModal({ open, onClose, onSave, initial = {} }: {
               <label className={LABEL_CLS}>Unit</label>
               <input className={INPUT_CLS} placeholder="pcs / kg / L" value={fields.unit} onChange={handleInputChange("unit")} />
             </div>
-            <div>
-              <label className={LABEL_CLS}>Unit Price</label>
-              <input type="number" min={0} step={0.01} className={INPUT_CLS} value={fields.price} onChange={handleInputChange("price")} />
-            </div>
-            <div>
+            <div className="col-span-2">
               <label className={LABEL_CLS}>Low Stock ⚠</label>
               <input type="number" min={0} className={INPUT_CLS} value={fields.low_stock_threshold} onChange={handleInputChange("low_stock_threshold")} />
             </div>
@@ -295,7 +271,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
       (filterCategory === "All" || item.category === filterCategory)
     ), [inventory, searchTerm, filterCategory]);
 
-  const totalValue = inventory.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const lowStockCount = inventory.filter((item) => item.quantity <= item.low_stock_threshold).length;
 
   // ── HANDLERS ────────────────────────────────────────────────────────────────
@@ -347,21 +322,22 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
           <h1 className="text-2xl font-bold text-slate-900">Inventory</h1>
           <p className="text-slate-500 text-sm mt-0.5">Track stock levels for your household items</p>
         </div>
-        <button onClick={() => openAddModal()} className="bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl flex items-center gap-1.5 hover:bg-slate-700 transition text-sm font-semibold shadow-sm flex-shrink-0">
-          <Plus size={15} /> Add Item
-        </button>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {lowStockCount > 0 && (
+            <div className="hidden sm:flex items-center gap-2 bg-red-50 border border-red-200 text-red-600 rounded-xl px-3 py-2 text-xs font-semibold">
+              <ShieldAlert size={14} className="text-red-500" />
+              {lowStockCount} low stock
+            </div>
+          )}
+          <button onClick={() => openAddModal()} className="bg-slate-900 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl flex items-center gap-1.5 hover:bg-slate-700 transition text-sm font-semibold shadow-sm">
+            <Plus size={15} /> Add Item
+          </button>
+        </div>
       </div>
 
-      {/* Metric Visuals */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-        <KpiCard label="Total Items" value={inventory.length} sub="Unique products tracked" icon={<Package size={15}/>} accent="#00B14F" />
-        <KpiCard label="Total Value" value={`${userCurrency} ${totalValue.toFixed(2)}`} sub="Estimated stock value" icon={<DollarSign size={15}/>} accent="#10B981" />
-        <KpiCard label="Low Stock" value={lowStockCount} sub={lowStockCount === 0 ? "All stocked up!" : "Items need restocking"} icon={<ShieldAlert size={15}/>} accent={lowStockCount > 0 ? "#EF4444" : "#10B981"} />
-      </div>
-
-      {/* Warnings & Notices */}
+      {/* Low stock banner — mobile only */}
       {lowStockCount > 0 && (
-        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
+        <div className="sm:hidden flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
           <AlertTriangle size={15} className="flex-shrink-0 text-red-500" />
           <b>{lowStockCount} item{lowStockCount > 1 ? "s are" : " is"} running low</b> — consider restocking soon.
         </div>
@@ -446,15 +422,15 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
         <table className="w-full">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              {["Item", "Category", "Stock", "Unit Price", "Value", "Actions"].map((h, i) => (
-                <th key={h} className={`px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 ${i === 5 ? "text-right" : "text-left"}`}>{h}</th>
+              {["Item", "Category", "Stock", "Actions"].map((h, i) => (
+                <th key={h} className={`px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 ${i === 3 ? "text-right" : "text-left"}`}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredInventory.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-12">
+                <td colSpan={4} className="px-5 py-12">
                   <EmptyState onAdd={() => openAddModal()} />
                 </td>
               </tr>
@@ -490,8 +466,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                         </div>
                       )}
                     </td>
-                    <td className="px-5 py-3.5"><span className="text-sm text-slate-700 font-mono">{userCurrency} {item.price.toFixed(2)}</span></td>
-                    <td className="px-5 py-3.5"><span className="text-sm font-semibold text-slate-800 font-mono">{userCurrency} {(item.price * item.quantity).toFixed(2)}</span></td>
                     <td className="px-5 py-3.5">
                       <div className="flex justify-end">
                         <RowActions
@@ -510,7 +484,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
         {filteredInventory.length > 0 && (
           <div className="px-5 py-3 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
             <span className="text-xs text-slate-400">{filteredInventory.length} of {inventory.length} item{inventory.length !== 1 ? "s" : ""}</span>
-            <span className="text-xs text-slate-400 font-mono">Total value: <span className="font-semibold text-slate-600">{userCurrency} {totalValue.toFixed(2)}</span></span>
           </div>
         )}
       </div>
@@ -547,7 +520,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                     />
                   </div>
                 </div>
-                <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between bg-slate-50/50">
+                <div className="border-t border-slate-100 px-4 py-2.5 flex items-center bg-slate-50/50">
                   <div className="flex items-center gap-2">
                     {isEditing ? (
                       <input type="number" min={0} className={`${EDIT_INPUT_CLS} w-16`} value={editQty} onChange={(e) => setEditQty(Number(e.target.value))} />
@@ -557,10 +530,6 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
                     <span className="text-xs text-slate-400">{item.unit}</span>
                     <StockBar quantity={item.quantity} threshold={item.low_stock_threshold} isLow={isLow} />
                   </div>
-                  <div className="text-right">
-                    <div className="text-xs text-slate-400">{userCurrency} {item.price.toFixed(2)} / {item.unit}</div>
-                    <div className="text-sm font-semibold text-slate-800 font-mono">{userCurrency} {(item.price * item.quantity).toFixed(2)}</div>
-                  </div>
                 </div>
               </div>
             );
@@ -568,8 +537,7 @@ export default function InventoryDashboard({ receipts, userCurrency, initialInve
         )}
         {filteredInventory.length > 0 && (
           <div className="text-center text-xs text-slate-400 py-1">
-            {filteredInventory.length} of {inventory.length} item{inventory.length !== 1 ? "s" : ""} &nbsp;·&nbsp;
-            Total: <span className="font-semibold text-slate-600">{userCurrency} {totalValue.toFixed(2)}</span>
+            {filteredInventory.length} of {inventory.length} item{inventory.length !== 1 ? "s" : ""}
           </div>
         )}
       </div>
