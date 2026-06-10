@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,8 +12,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GroceryTrack - Smart Receipt Management",
-  description: "Smart grocery receipt scanner with price tracking powered by Gemini AI",
+  title: "Receipt Track",
+  description: "A grocery receipt scanner and spending tracker built for Malaysian households.",
 };
 
 export default function RootLayout({
